@@ -1,0 +1,1017 @@
+{
+  "nodes": [
+    {
+      "id": "cetacea",
+      "label": "Order Cetacea",
+      "type": "order",
+      "description": "Marine mammals including all whales, dolphins, and porpoises",
+      "children": ["mysticeti", "odontoceti"]
+    },
+    {
+      "id": "mysticeti",
+      "label": "Mysticeti (Baleen Whales)",
+      "type": "suborder",
+      "parent": "cetacea",
+      "species_count": 15,
+      "children": ["balaenopteridae", "balaenidae", "eschrichtiidae", "cetotheriidae"]
+    },
+    {
+      "id": "odontoceti",
+      "label": "Odontoceti (Toothed Whales)",
+      "type": "suborder",
+      "parent": "cetacea",
+      "species_count": 29,
+      "children": ["physeteridae", "kogiidae", "ziphiidae", "monodontidae"]
+    },
+    {
+      "id": "balaenopteridae",
+      "label": "Balaenopteridae (Rorquals)",
+      "type": "family",
+      "parent": "mysticeti",
+      "species_count": 9,
+      "children": ["balaenoptera", "megaptera"]
+    },
+    {
+      "id": "balaenidae",
+      "label": "Balaenidae (Right Whales)",
+      "type": "family",
+      "parent": "mysticeti",
+      "species_count": 4,
+      "children": ["eubalaena", "balaena"]
+    },
+    {
+      "id": "eschrichtiidae",
+      "label": "Eschrichtiidae (Gray Whales)",
+      "type": "family",
+      "parent": "mysticeti",
+      "species_count": 1,
+      "children": ["eschrichtius"]
+    },
+    {
+      "id": "cetotheriidae",
+      "label": "Cetotheriidae (Pygmy Right Whales)",
+      "type": "family",
+      "parent": "mysticeti",
+      "species_count": 1,
+      "children": ["caperea"]
+    },
+    {
+      "id": "physeteridae",
+      "label": "Physeteridae (Sperm Whales)",
+      "type": "family",
+      "parent": "odontoceti",
+      "species_count": 1,
+      "children": ["physeter"]
+    },
+    {
+      "id": "kogiidae",
+      "label": "Kogiidae (Pygmy Sperm Whales)",
+      "type": "family",
+      "parent": "odontoceti",
+      "species_count": 2,
+      "children": ["kogia"]
+    },
+    {
+      "id": "ziphiidae",
+      "label": "Ziphiidae (Beaked Whales)",
+      "type": "family",
+      "parent": "odontoceti",
+      "species_count": 24,
+      "children": ["ziphius", "berardius", "tasmacetus", "hyperoodon", "indopacetus", "mesoplodon"]
+    },
+    {
+      "id": "monodontidae",
+      "label": "Monodontidae (Arctic Whales)",
+      "type": "family",
+      "parent": "odontoceti",
+      "species_count": 2,
+      "children": ["delphinapterus", "monodon"]
+    },
+    {
+      "id": "balaenoptera",
+      "label": "Balaenoptera",
+      "type": "genus",
+      "parent": "balaenopteridae",
+      "species_count": 8,
+      "children": ["b_acutorostrata", "b_bonaerensis", "b_borealis", "b_edeni", "b_ricei", "b_musculus", "b_omurai", "b_physalus"]
+    },
+    {
+      "id": "megaptera",
+      "label": "Megaptera",
+      "type": "genus",
+      "parent": "balaenopteridae",
+      "species_count": 1,
+      "children": ["m_novaeangliae"]
+    },
+    {
+      "id": "eubalaena",
+      "label": "Eubalaena",
+      "type": "genus",
+      "parent": "balaenidae",
+      "species_count": 3,
+      "children": ["e_australis", "e_japonica", "e_glacialis"]
+    },
+    {
+      "id": "balaena",
+      "label": "Balaena",
+      "type": "genus",
+      "parent": "balaenidae",
+      "species_count": 1,
+      "children": ["b_mysticetus"]
+    },
+    {
+      "id": "eschrichtius",
+      "label": "Eschrichtius",
+      "type": "genus",
+      "parent": "eschrichtiidae",
+      "species_count": 1,
+      "children": ["e_robustus"]
+    },
+    {
+      "id": "caperea",
+      "label": "Caperea",
+      "type": "genus",
+      "parent": "cetotheriidae",
+      "species_count": 1,
+      "children": ["c_marginata"]
+    },
+    {
+      "id": "physeter",
+      "label": "Physeter",
+      "type": "genus",
+      "parent": "physeteridae",
+      "species_count": 1,
+      "children": ["p_macrocephalus"]
+    },
+    {
+      "id": "kogia",
+      "label": "Kogia",
+      "type": "genus",
+      "parent": "kogiidae",
+      "species_count": 2,
+      "children": ["k_breviceps", "k_sima"]
+    },
+    {
+      "id": "ziphius",
+      "label": "Ziphius",
+      "type": "genus",
+      "parent": "ziphiidae",
+      "species_count": 1,
+      "children": ["z_cavirostris"]
+    },
+    {
+      "id": "berardius",
+      "label": "Berardius",
+      "type": "genus",
+      "parent": "ziphiidae",
+      "species_count": 3,
+      "children": ["b_bairdii", "b_arnuxii", "b_minimus"]
+    },
+    {
+      "id": "tasmacetus",
+      "label": "Tasmacetus",
+      "type": "genus",
+      "parent": "ziphiidae",
+      "species_count": 1,
+      "children": ["t_shepherdi"]
+    },
+    {
+      "id": "hyperoodon",
+      "label": "Hyperoodon",
+      "type": "genus",
+      "parent": "ziphiidae",
+      "species_count": 2,
+      "children": ["h_ampullatus", "h_planifrons"]
+    },
+    {
+      "id": "indopacetus",
+      "label": "Indopacetus",
+      "type": "genus",
+      "parent": "ziphiidae",
+      "species_count": 1,
+      "children": ["i_pacificus"]
+    },
+    {
+      "id": "mesoplodon",
+      "label": "Mesoplodon",
+      "type": "genus",
+      "parent": "ziphiidae",
+      "species_count": 17,
+      "children": ["m_mirus", "m_europaeus", "m_bidens", "m_densirostris", "m_hectori", "m_carlhubbsi", "m_stejnegeri", "m_bowdoini", "m_ginkgodens", "m_grayi", "m_layardii", "m_peruvianus", "m_perrin", "m_perrini", "m_traversii", "m_hotaula", "m_eueu"]
+    },
+    {
+      "id": "delphinapterus",
+      "label": "Delphinapterus",
+      "type": "genus",
+      "parent": "monodontidae",
+      "species_count": 1,
+      "children": ["d_leucas"]
+    },
+    {
+      "id": "monodon",
+      "label": "Monodon",
+      "type": "genus",
+      "parent": "monodontidae",
+      "species_count": 1,
+      "children": ["mo_monoceros"]
+    },
+    {
+      "id": "b_acutorostrata",
+      "label": "B. acutorostrata",
+      "common_name": "Common Minke Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "Smallest of the great whales at 7-10m (23-33ft) and up to 9 tons, with distinctive pointed snout, streamlined body, and characteristic white band on the flippers. Most abundant and widely distributed rorqual found in all major oceans from Arctic to Antarctic, known for curious behavior around vessels. Less depleted by historical whaling due to their smaller size.",
+      "iucn_status": "Least Concern",
+      "size": "7-10m",
+      "weight": "up to 9 tons"
+    },
+    {
+      "id": "b_bonaerensis",
+      "label": "B. bonaerensis",
+      "common_name": "Antarctic Minke Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "Slightly larger than common minke whales at up to 10.7m (35ft), found primarily in Southern Hemisphere waters particularly around Antarctica. Distinguished from common minke whales by size, distribution, and subtle morphological differences. Population estimated over 500,000 individuals but some evidence of decline since the 1970s.",
+      "iucn_status": "Near Threatened",
+      "size": "up to 10.7m",
+      "weight": "up to 10 tons"
+    },
+    {
+      "id": "b_borealis",
+      "label": "B. borealis",
+      "common_name": "Sei Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "Third-largest baleen whale reaching 15-20m and up to 20 tons, inhabiting temperate and subpolar waters worldwide while avoiding tropical and polar extremes. One of the fastest whales reaching speeds up to 30 mph, often confused with Bryde's whales but preferring cooler waters. Population severely depleted by 20th century whaling with an estimated 300,000 individuals killed.",
+      "iucn_status": "Endangered",
+      "size": "15-20m",
+      "weight": "up to 20 tons"
+    },
+    {
+      "id": "b_edeni",
+      "label": "B. edeni",
+      "common_name": "Bryde's Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "Medium-sized tropical rorqual reaching 12-15m (40-50ft), distinguished by three prominent parallel ridges on the rostrum and preference for warm waters between 40°N and 40°S. Often confused with sei whales but found year-round in tropical waters rather than migrating. Taxonomic status remains complex with potential subspecies differentiation and frequent confusion with related species.",
+      "iucn_status": "Data Deficient",
+      "size": "12-15m",
+      "weight": "12-25 tons"
+    },
+    {
+      "id": "b_ricei",
+      "label": "B. ricei",
+      "common_name": "Rice's Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "Recently recognized species (2021) endemic to the Gulf of Mexico, reaching up to 12.65m (41.5ft) and 27 tons, virtually identical in appearance to Bryde's whale but genetically and morphologically distinct. Found exclusively along the continental slope at 150-410m depth, feeding near the seafloor on fish rather than krill. One of the world's most critically endangered large whales.",
+      "iucn_status": "Critically Endangered",
+      "size": "up to 12.65m",
+      "weight": "up to 27 tons"
+    },
+    {
+      "id": "b_musculus",
+      "label": "B. musculus",
+      "common_name": "Blue Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "The largest animal ever known to have existed, reaching up to 29.9m (98ft) and 199 tons, with a streamlined blue-gray body and distinctive pleated throat grooves for lunge feeding on krill. Found in all oceans except the Arctic, with several subspecies including the massive Antarctic blue whale. Despite some recovery from whaling, populations remain well below historical levels.",
+      "iucn_status": "Endangered",
+      "size": "up to 29.9m",
+      "weight": "up to 199 tons"
+    },
+    {
+      "id": "b_omurai",
+      "label": "B. omurai",
+      "common_name": "Omura's Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "Recently described species (2003) reaching 10-12m (33-39ft), closely related to Bryde's whales but smaller with distinctive asymmetrical coloration similar to fin whales and fewer baleen plates than other rorquals. Found primarily in tropical Indo-Pacific waters, with some populations apparently non-migratory. Extremely poorly known with very few confirmed sightings.",
+      "iucn_status": "Data Deficient",
+      "size": "10-12m",
+      "weight": "15-20 tons"
+    },
+    {
+      "id": "b_physalus",
+      "label": "B. physalus",
+      "common_name": "Fin Whale",
+      "type": "species",
+      "parent": "balaenoptera",
+      "description": "The second-largest whale species reaching up to 26m (85ft) and 77-81 tons, distinguished by their asymmetrical coloration with white on the right side of the head and dark on the left. Found in all major oceans from polar to tropical waters, known as the fastest baleen whale capable of 23 mph. Populations have roughly doubled since the 1970s following whaling bans.",
+      "iucn_status": "Vulnerable",
+      "size": "up to 26m",
+      "weight": "77-81 tons"
+    },
+    {
+      "id": "m_novaeangliae",
+      "label": "M. novaeangliae",
+      "common_name": "Humpback Whale",
+      "type": "species",
+      "parent": "megaptera",
+      "description": "Distinctive medium-sized whale reaching 14-17m (46-56ft) and up to 40 tons, famous for extremely long pectoral fins, complex songs, and spectacular breaching behavior. Found in all oceans with extensive migrations between polar feeding and tropical breeding areas. Notable conservation success story with population recovery from near extinction to approximately 135,000 individuals worldwide.",
+      "iucn_status": "Least Concern",
+      "size": "14-17m",
+      "weight": "up to 40 tons"
+    },
+    {
+      "id": "e_australis",
+      "label": "E. australis",
+      "common_name": "Southern Right Whale",
+      "type": "species",
+      "parent": "eubalaena",
+      "description": "The most abundant of the three right whale species, reaching 16-18m (52-59ft) and up to 80 tons, inhabiting Southern Hemisphere oceans between 20°-60°S latitude. Distinguished by their V-shaped blow, rotund body, and distinctive white callosities used for individual identification. Successfully recovering from historical whaling with current population around 13,600 individuals.",
+      "iucn_status": "Least Concern",
+      "size": "16-18m",
+      "weight": "up to 80 tons"
+    },
+    {
+      "id": "e_japonica",
+      "label": "E. japonica",
+      "common_name": "North Pacific Right Whale",
+      "type": "species",
+      "parent": "eubalaena",
+      "description": "Closely related to the North Atlantic species but genetically distinct, these large whales reach similar sizes (14-18m) and share the characteristic right whale body plan with prominent callosities and no dorsal fin. Found in North Pacific waters from the Sea of Okhotsk to the Gulf of Alaska, feeding primarily on copepods and small crustaceans. Population extremely depleted with likely fewer than 100 individuals.",
+      "iucn_status": "Endangered",
+      "size": "14-18m",
+      "weight": "45-80 tons"
+    },
+    {
+      "id": "e_glacialis",
+      "label": "E. glacialis",
+      "common_name": "North Atlantic Right Whale",
+      "type": "species",
+      "parent": "eubalaena",
+      "description": "One of the most critically endangered large whales, reaching 14m (45ft) and 45-54 tons, with a distinctive stocky black body, strongly arched jawline, and prominent white callosities on the head. Found exclusively in North Atlantic coastal waters, migrating between Labrador Sea feeding grounds and Georgia/Florida calving areas. Known for slow surface-skimming feeding on copepods, with fewer than 250 mature individuals remaining.",
+      "iucn_status": "Critically Endangered",
+      "size": "up to 14m",
+      "weight": "45-54 tons"
+    },
+    {
+      "id": "b_mysticetus",
+      "label": "B. mysticetus",
+      "common_name": "Bowhead Whale",
+      "type": "species",
+      "parent": "balaena",
+      "description": "Arctic specialists reaching up to 62 feet with distinctive massive triangular skulls capable of breaking through sea ice up to 20cm thick, potentially living over 200 years making them among the longest-lived mammals. Endemic to Arctic and subarctic waters, feeding on copepods and krill through massive baleen plates up to 4m long. Most populations recovering well except for some critically endangered subpopulations.",
+      "iucn_status": "Least Concern",
+      "size": "up to 18.9m",
+      "weight": "75-100 tons"
+    },
+    {
+      "id": "e_robustus",
+      "label": "E. robustus",
+      "common_name": "Gray Whale",
+      "type": "species",
+      "parent": "eschrichtius",
+      "description": "Medium-sized coastal whale reaching up to 15.2m (50ft) and 41 tons, distinguished by mottled gray coloration covered in barnacles and parasites, dorsal hump instead of dorsal fin, and bottom-feeding behavior in shallow waters. Undertakes one of the longest mammalian migrations up to 12,000 miles round trip between Arctic feeding and Baja California breeding lagoons. Eastern Pacific population recovered, but Western Pacific population critically endangered.",
+      "iucn_status": "Least Concern",
+      "size": "up to 15.2m",
+      "weight": "up to 41 tons"
+    },
+    {
+      "id": "c_marginata",
+      "label": "C. marginata",
+      "common_name": "Pygmy Right Whale",
+      "type": "species",
+      "parent": "caperea",
+      "description": "The smallest baleen whale at only 6.5m (21ft) and up to 4.5 tons, found exclusively in Southern Hemisphere cold temperate waters around Antarctica. Distinguished by streamlined body, small falcate dorsal fin, and strongly arched jawline, representing the last surviving member of the ancient cetothere family. Extremely poorly known due to its remote habitat and rarity of sightings.",
+      "iucn_status": "Data Deficient",
+      "size": "up to 6.5m",
+      "weight": "up to 4.5 tons"
+    },
+    {
+      "id": "p_macrocephalus",
+      "label": "P. macrocephalus",
+      "common_name": "Sperm Whale",
+      "type": "species",
+      "parent": "physeter",
+      "description": "The largest toothed whale, reaching 16-20m in males and 11-12m in females, with the characteristic massive square head comprising 25-35% of body length. Found in deep oceanic waters worldwide, these highly social whales dive to extreme depths (over 2,000m) for up to 90 minutes to hunt squid and deep-sea fish. Females live in stable matrilineal groups with cooperative care, while mature males are largely solitary.",
+      "iucn_status": "Vulnerable",
+      "size": "11-20m",
+      "weight": "15-57 tons"
+    },
+    {
+      "id": "k_breviceps",
+      "label": "K. breviceps",
+      "common_name": "Pygmy Sperm Whale",
+      "type": "species",
+      "parent": "kogia",
+      "description": "Small robust whale measuring 3-4.25m and weighing up to 400kg, with distinctive shark-like head and underslung jaw. Inhabits deep temperate and tropical waters worldwide, typically beyond the continental shelf. Known for inconspicuous surface behavior and ability to release dark ink-like fluid when threatened, similar to cephalopods.",
+      "iucn_status": "Data Deficient",
+      "size": "3-4.25m",
+      "weight": "up to 400kg"
+    },
+    {
+      "id": "k_sima",
+      "label": "K. sima",
+      "common_name": "Dwarf Sperm Whale",
+      "type": "species",
+      "parent": "kogia",
+      "description": "Smaller than pygmy sperm whale at 2-2.7m length and 136-272kg weight, distinguished by dorsal fin position closer to mid-body. Inhabits continental shelves and slopes in temperate and tropical oceans, feeding primarily on squid through suction feeding. Lives in small pods of 1-4 individuals.",
+      "iucn_status": "Data Deficient",
+      "size": "2-2.7m",
+      "weight": "136-272kg"
+    },
+    {
+      "id": "z_cavirostris",
+      "label": "Z. cavirostris",
+      "common_name": "Cuvier's Beaked Whale",
+      "type": "species",
+      "parent": "ziphius",
+      "description": "The most widely distributed and commonly observed beaked whale, reaching 5.1-6.9m length and 2-3.5 tons. Notable for extreme diving abilities with records of 2,992m depth and 222 minutes duration. Males develop distinctive light/white coloration on head extending posteriorly with age, while females remain darker. Found in all temperate and tropical oceans in deep waters >300m, feeding primarily on cephalopods and some fish.",
+      "iucn_status": "Least Concern",
+      "size": "5.1-6.9m",
+      "weight": "2-3.5 tons"
+    },
+    {
+      "id": "b_bairdii",
+      "label": "B. bairdii",
+      "common_name": "Baird's Beaked Whale",
+      "type": "species",
+      "parent": "berardius",
+      "description": "Largest beaked whale reaching up to 12.8m, found in deep North Pacific waters. Distinguished by prominent bulbous melon, long bottlenose-like beak, and four teeth visible at tip of lower jaw in both sexes. Highly social with groups of 5-20 individuals, capable of diving over 1,000m for extended periods to feed on squid and deep-sea fish.",
+      "iucn_status": "Least Concern",
+      "size": "up to 12.8m",
+      "weight": "11-15 tons"
+    },
+    {
+      "id": "b_arnuxii",
+      "label": "B. arnuxii",
+      "common_name": "Arnoux's Beaked Whale",
+      "type": "species",
+      "parent": "berardius",
+      "description": "Very similar to Baird's beaked whale but slightly smaller (8.5-9.75m vs 9.1-11.1m) and found in Southern Hemisphere waters from Antarctica to about 34°S. Inhabits deep oceanic waters but occasionally seen in shallower coastal areas and near sea ice. Lives in small groups and dives to extreme depths.",
+      "iucn_status": "Least Concern",
+      "size": "8.5-9.75m",
+      "weight": "7-10 tons"
+    },
+    {
+      "id": "b_minimus",
+      "label": "B. minimus",
+      "common_name": "Sato's Beaked Whale",
+      "type": "species",
+      "parent": "berardius",
+      "description": "Smallest Berardius species at 6-7m length, distinguished by nearly black coloration and proportionally shorter beak (3.6% vs 5.8% of body length in B. bairdii). Known to Japanese whalers as 'kurotsuchi' (black hammer), found in North Pacific waters including Sea of Japan. Exhibits fewer linear scars than other Berardius species but shows distinctive round cookiecutter shark bite marks.",
+      "iucn_status": "Near Threatened",
+      "size": "6-7m",
+      "weight": "4-6 tons"
+    },
+    {
+      "id": "t_shepherdi",
+      "label": "T. shepherdi",
+      "common_name": "Shepherd's Beaked Whale",
+      "type": "species",
+      "parent": "tasmacetus",
+      "description": "One of the largest beaked whales at 6-7.1m length, unique among beaked whales for having a full set of functional teeth (17-27 pairs) in both upper and lower jaws of both sexes. Dark brownish-black dorsally with paler sides and distinctive white throat patch and blaze above pectoral fins. Found in deep, cold temperate waters of Southern Hemisphere in circumpolar distribution. Unlike other beaked whales, feeds on both fish and squid rather than primarily squid.",
+      "iucn_status": "Data Deficient",
+      "size": "6-7.1m",
+      "weight": "2-3 tons"
+    },
+    {
+      "id": "h_ampullatus",
+      "label": "H. ampullatus",
+      "common_name": "Northern Bottlenose Whale",
+      "type": "species",
+      "parent": "hyperoodon",
+      "description": "Medium-sized beaked whale (7-9m) found exclusively in North Atlantic deep waters, renowned for extreme diving ability reaching 2,339m depth for up to 130 minutes. Males develop distinctive flattened square melon with age, while females retain more rounded foreheads. Known for curious behavior toward ships and lives in small social groups.",
+      "iucn_status": "Near Threatened",
+      "size": "7-9m",
+      "weight": "5-7.5 tons"
+    },
+    {
+      "id": "h_planifrons",
+      "label": "H. planifrons",
+      "common_name": "Southern Bottlenose Whale",
+      "type": "species",
+      "parent": "hyperoodon",
+      "description": "Southern Hemisphere counterpart to northern bottlenose whale, reaching up to 7.8m in females and 7.14m in males. Inhabits deep Antarctic and subantarctic waters, often associated with sea ice. Distinguished by lower cranial crests compared to northern species and brownish-grey coloration that lightens with age to yellowish-white in older individuals.",
+      "iucn_status": "Least Concern",
+      "size": "up to 7.8m",
+      "weight": "6-8 tons"
+    },
+    {
+      "id": "i_pacificus",
+      "label": "I. pacificus",
+      "common_name": "Tropical Bottlenose Whale",
+      "type": "species",
+      "parent": "indopacetus",
+      "description": "Medium-sized beaked whale (5-6.5m, up to 7.7m maximum) with widespread distribution across tropical and subtropical Indian and Pacific Ocean waters. Features distinct beak with protruding lower jaw, large triangular dorsal fin, and bulbous melon. One of the rarest beaked whales until recently, now known from multiple sightings in large groups of 10-100 individuals.",
+      "iucn_status": "Least Concern",
+      "size": "5-7.7m",
+      "weight": "1-2.5 tons"
+    },
+    {
+      "id": "m_mirus",
+      "label": "M. mirus",
+      "common_name": "True's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "Reaching lengths of 14.5-21 feet and found in deep warm temperate waters of the North Atlantic and other areas including Southern Hemisphere locations. Distinguished from similar species by pale coloration across the melon and lack of defined dorsal stripe. Males have visible teeth erupting from the lower jaw. Like other beaked whales, they are deep divers feeding primarily on squid and are considered cryptic and skittish, making field identification challenging.",
+      "iucn_status": "Least Concern",
+      "size": "4.4-5.5m",
+      "weight": "1-1.4 tons"
+    },
+    {
+      "id": "m_europaeus",
+      "label": "M. europaeus",
+      "common_name": "Gervais' Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "Atlantic species measuring 4-5.5m, most commonly sighted mesoplodont off U.S. Atlantic coast and Gulf of Mexico. Males have small teeth positioned about one-third back from jaw tip. Inhabits warm temperate and tropical Atlantic waters, with some records from Mediterranean. Shows typical mesoplodont deep-diving behavior and squid-based diet.",
+      "iucn_status": "Data Deficient",
+      "size": "4-5.5m",
+      "weight": "1-1.2 tons"
+    },
+    {
+      "id": "m_bidens",
+      "label": "M. bidens",
+      "common_name": "Sowerby's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "First beaked whale species discovered, measuring 4-5.5m and found in deep North Atlantic waters. Known as 'North Atlantic beaked whale,' with males having two prominent teeth erupting from lower jaw tip. Inhabits cold temperate and subarctic waters, occasionally observed near ice pack. Shows typical mesoplodont scarring from intraspecific fighting in males.",
+      "iucn_status": "Data Deficient",
+      "size": "4-5.5m",
+      "weight": "1-1.3 tons"
+    },
+    {
+      "id": "m_densirostris",
+      "label": "M. densirostris",
+      "common_name": "Blainville's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "Most widespread mesoplodont with cosmopolitan distribution in tropical and warm temperate waters. Measures 4.5-6.2m with distinctive dense bone structure in rostrum. Males have flattened, massive teeth that arch over upper jaw. Best-studied mesoplodont due to long-term research in Hawaii and Bahamas, showing fluid social structure with females forming more stable groups than males.",
+      "iucn_status": "Data Deficient",
+      "size": "4.5-6.2m",
+      "weight": "0.8-1 tons"
+    },
+    {
+      "id": "m_hectori",
+      "label": "M. hectori",
+      "common_name": "Hector's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "One of the smallest beaked whales at 4.2-4.4m length, with dark greyish-brown coloration dorsally and pale grey ventrally. Males have small triangular teeth near the tip of the lower jaw. Found in cold temperate waters of the Southern Hemisphere (35-55°S), preferring deep oceanic waters and feeding primarily on squid. Information is limited due to very few confirmed sightings and mostly known from strandings.",
+      "iucn_status": "Data Deficient",
+      "size": "4.2-4.4m",
+      "weight": "1 ton"
+    },
+    {
+      "id": "m_carlhubbsi",
+      "label": "M. carlhubbsi",
+      "common_name": "Hubbs' Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "North Pacific species measuring 5-5.5m, distinguished by arched rostrum and teeth positioned far back on lower jaw in males. Limited information available as rarely observed alive; known primarily from strandings along Pacific coast from California to Japan. Males show characteristic beaked whale scarring from fighting with erupted teeth.",
+      "iucn_status": "Data Deficient",
+      "size": "5-5.5m",
+      "weight": "1.5 tons"
+    },
+    {
+      "id": "m_stejnegeri",
+      "label": "M. stejnegeri",
+      "common_name": "Stejneger's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "Reaching 5.3m+ in length with distinctive large, spatulate teeth in males that can grow extremely large and converge, potentially restricting mouth opening. Dark grey to black coloration with light ventral sides, found in cool temperate waters of North Pacific from Bering Sea to California and Japan. Feeds primarily on deep-water squid and some fish, with evidence of commercial fishing interactions in Japan.",
+      "iucn_status": "Near Threatened",
+      "size": "5.3m+",
+      "weight": "1.4-1.5 tons"
+    },
+    {
+      "id": "m_bowdoini",
+      "label": "M. bowdoini",
+      "common_name": "Andrews' Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "Poorly known species measuring 4-5m, known only from strandings in Southern Hemisphere (New Zealand, Australia, Macquarie Island, Falklands, Tristan da Cunha). Distinguished by robust body, peculiar lower jaw that rises significantly midway with teeth extending over rostrum, and sometimes shows light patches on head sides. Never observed alive in wild.",
+      "iucn_status": "Data Deficient",
+      "size": "4-5m",
+      "weight": "1-1.5 tons"
+    },
+    {
+      "id": "m_ginkgodens",
+      "label": "M. ginkgodens",
+      "common_name": "Ginkgo-toothed Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "A poorly known species reaching 4.8-4.9m in length, distinguished by its wide, ginkgo leaf-shaped teeth in males. Notable for being more robust than most mesoplodont whales and having the least amount of scarring among Mesoplodon species, suggesting they are less aggressive. Found in tropical and temperate waters of the Pacific and Indian Oceans, primarily feeding on squid and deep-water fish through deep diving to depths over 3,500m.",
+      "iucn_status": "Least Concern",
+      "size": "4.8-4.9m",
+      "weight": "1.5 tons"
+    },
+    {
+      "id": "m_grayi",
+      "label": "M. grayi",
+      "common_name": "Gray's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "One of the better-known beaked whales, reaching 5.5-6.0m in length and weighing around 1,100kg. Distinctive for having a very long, pointed white beak and being fairly gregarious, often stranding in groups (up to 28 individuals recorded). Found in Southern Hemisphere waters between 30-45°S, typically diving to depths of 2,000m. Feeds primarily on squid and is the most commonly stranded beaked whale in New Zealand.",
+      "iucn_status": "Least Concern",
+      "size": "5.5-6.0m",
+      "weight": "1.1 tons"
+    },
+    {
+      "id": "m_layardii",
+      "label": "M. layardii",
+      "common_name": "Strap-toothed Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "One of the largest Mesoplodon species, reaching 6.2m and 1,300kg. Distinctive for males' extremely long curved tusks that grow over the upper jaw, potentially limiting mouth opening to 11-13cm. Adults show distinctive white coloration on beak, cape extending halfway to dorsal fin, and white-tipped dorsal fin and flukes. Found in cold temperate to subantarctic waters of Southern Hemisphere, diving to great depths to feed on squid, fish, and crustaceans.",
+      "iucn_status": "Least Concern",
+      "size": "6.2m",
+      "weight": "1.3 tons"
+    },
+    {
+      "id": "m_peruvianus",
+      "label": "M. peruvianus",
+      "common_name": "Pygmy Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "The smallest member of genus Mesoplodon at only 3.4-3.9m maximum length. Dark grey dorsally fading to light grey ventrally, with spindle-shaped body and short dark-tipped beak. Found in deep oceanic waters of the eastern tropical Pacific, feeding on mid- to deep-sea fish and squid. Known primarily from strandings off Peru and a few other Pacific locations, making it one of the least known cetaceans.",
+      "iucn_status": "Least Concern",
+      "size": "3.4-3.9m",
+      "weight": "0.7-0.9 tons"
+    },
+    {
+      "id": "m_perrin",
+      "label": "M. perrin",
+      "common_name": "Perrin's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "One of the most recently described species (2002), reaching 3.9-4.4m in length. Known only from Southern and Central California waters, with triangular teeth positioned at the tip of the lower jaw in males. Has the shortest rostrum of any Mesoplodon except Hector's and pygmy beaked whales. Dark grey dorsally with white undersides, feeding primarily on pelagic squid. Never definitively recorded alive and known only from stranded specimens.",
+      "iucn_status": "Endangered",
+      "size": "3.9-4.4m",
+      "weight": "1 ton"
+    },
+    {
+      "id": "m_perrini",
+      "label": "M. perrini",
+      "common_name": "Perrin's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "One of the most recently described species (2002), reaching 3.9-4.4m in length. Known only from Southern and Central California waters, with triangular teeth positioned at the tip of the lower jaw in males. Has the shortest rostrum of any Mesoplodon except Hector's and pygmy beaked whales. Dark grey dorsally with white undersides, feeding primarily on pelagic squid. Never definitively recorded alive and known only from stranded specimens.",
+      "iucn_status": "Data Deficient",
+      "size": "3.9-4.4m",
+      "weight": "1 ton"
+    },
+    {
+      "id": "m_traversii",
+      "label": "M. traversii",
+      "common_name": "Spade-toothed Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "The rarest beaked whale species, known from only six confirmed specimens since 1872 (five from New Zealand, one from Chile). Estimated to reach 5.0-5.5m length based on skull size, with extremely large spade-shaped teeth (23cm) in males. Never definitively observed alive, so behavior and ecology are unknown but presumed similar to other Mesoplodon species. The 2010 mother-calf pair provided first external appearance data showing dark grey/black dorsally, white ventrally.",
+      "iucn_status": "Data Deficient",
+      "size": "5.0-5.5m",
+      "weight": "1.5 tons"
+    },
+    {
+      "id": "m_hotaula",
+      "label": "M. hotaula",
+      "common_name": "Deraniyagala's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "An extremely rare species known from only seven stranded specimens until recent South China Sea sightings. Growing to less than 5m in length with blue-grey coloration and distinctive pale, mottled cheeks and white lower lip. Found in tropical waters of the Indian and Pacific Oceans around equatorial islands. Like other beaked whales, feeds on deep-water squid during long foraging dives, with recent observations showing dive durations up to 1.8 hours.",
+      "iucn_status": "Data Deficient",
+      "size": "less than 5m",
+      "weight": "1 ton"
+    },
+    {
+      "id": "m_eueu",
+      "label": "M. eueu",
+      "common_name": "Southern True's Beaked Whale",
+      "type": "species",
+      "parent": "mesoplodon",
+      "description": "Recently split from True's beaked whale based on morphological and genomic evidence, found in Southern Hemisphere waters. Similar to M. mirus but genetically and morphologically distinct. Reaches similar lengths of 4.5-5.5m and shows typical mesoplodont characteristics. Limited information available due to recent taxonomic recognition and cryptic nature of the species.",
+      "iucn_status": "Data Deficient",
+      "size": "4.5-5.5m",
+      "weight": "1-1.4 tons"
+    },
+    {
+      "id": "d_leucas",
+      "label": "D. leucas",
+      "common_name": "Beluga Whale",
+      "type": "species",
+      "parent": "delphinapterus",
+      "description": "Medium-sized Arctic cetacean (3-5.5m length, 400-1,500kg) known as the 'white whale' and 'sea canary.' Adults are uniformly white with distinctive bulbous forehead (melon) and no dorsal fin. Highly social, forming pods of 10-25 individuals that communicate using diverse vocalizations. Feeds primarily on fish, squid, and crustaceans in Arctic and subarctic waters.",
+      "iucn_status": "Near Threatened",
+      "size": "3-5.5m",
+      "weight": "400-1,500kg"
+    },
+    {
+      "id": "mo_monoceros",
+      "label": "M. monoceros",
+      "common_name": "Narwhal",
+      "type": "species",
+      "parent": "monodon",
+      "description": "Arctic specialist whale (4-4.6m length, up to 1,600kg) famous for males' spiral ivory tusk reaching 3m long. Stocky body with mottled grey-black coloration that whitens with age, shallow dorsal ridge instead of fin. Lives in tight social groups, deep-diving specialist feeding on Arctic cod, Greenland halibut, and squid. Restricted to Arctic Ocean waters around pack ice.",
+      "iucn_status": "Least Concern",
+      "size": "4-4.6m",
+      "weight": "up to 1,600kg"
+    }
+  ],
+  "edges": [
+    {
+      "source": "cetacea",
+      "target": "mysticeti"
+    },
+    {
+      "source": "cetacea",
+      "target": "odontoceti"
+    },
+    {
+      "source": "mysticeti",
+      "target": "balaenopteridae"
+    },
+    {
+      "source": "mysticeti",
+      "target": "balaenidae"
+    },
+    {
+      "source": "mysticeti",
+      "target": "eschrichtiidae"
+    },
+    {
+      "source": "mysticeti",
+      "target": "cetotheriidae"
+    },
+    {
+      "source": "odontoceti",
+      "target": "physeteridae"
+    },
+    {
+      "source": "odontoceti",
+      "target": "kogiidae"
+    },
+    {
+      "source": "odontoceti",
+      "target": "ziphiidae"
+    },
+    {
+      "source": "odontoceti",
+      "target": "monodontidae"
+    },
+    {
+      "source": "balaenopteridae",
+      "target": "balaenoptera"
+    },
+    {
+      "source": "balaenopteridae",
+      "target": "megaptera"
+    },
+    {
+      "source": "balaenidae",
+      "target": "eubalaena"
+    },
+    {
+      "source": "balaenidae",
+      "target": "balaena"
+    },
+    {
+      "source": "eschrichtiidae",
+      "target": "eschrichtius"
+    },
+    {
+      "source": "cetotheriidae",
+      "target": "caperea"
+    },
+    {
+      "source": "physeteridae",
+      "target": "physeter"
+    },
+    {
+      "source": "kogiidae",
+      "target": "kogia"
+    },
+    {
+      "source": "ziphiidae",
+      "target": "ziphius"
+    },
+    {
+      "source": "ziphiidae",
+      "target": "berardius"
+    },
+    {
+      "source": "ziphiidae",
+      "target": "tasmacetus"
+    },
+    {
+      "source": "ziphiidae",
+      "target": "hyperoodon"
+    },
+    {
+      "source": "ziphiidae",
+      "target": "indopacetus"
+    },
+    {
+      "source": "ziphiidae",
+      "target": "mesoplodon"
+    },
+    {
+      "source": "monodontidae",
+      "target": "delphinapterus"
+    },
+    {
+      "source": "monodontidae",
+      "target": "monodon"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_acutorostrata"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_bonaerensis"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_borealis"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_edeni"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_ricei"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_musculus"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_omurai"
+    },
+    {
+      "source": "balaenoptera",
+      "target": "b_physalus"
+    },
+    {
+      "source": "megaptera",
+      "target": "m_novaeangliae"
+    },
+    {
+      "source": "eubalaena",
+      "target": "e_australis"
+    },
+    {
+      "source": "eubalaena",
+      "target": "e_japonica"
+    },
+    {
+      "source": "eubalaena",
+      "target": "e_glacialis"
+    },
+    {
+      "source": "balaena",
+      "target": "b_mysticetus"
+    },
+    {
+      "source": "eschrichtius",
+      "target": "e_robustus"
+    },
+    {
+      "source": "caperea",
+      "target": "c_marginata"
+    },
+    {
+      "source": "physeter",
+      "target": "p_macrocephalus"
+    },
+    {
+      "source": "kogia",
+      "target": "k_breviceps"
+    },
+    {
+      "source": "kogia",
+      "target": "k_sima"
+    },
+    {
+      "source": "ziphius",
+      "target": "z_cavirostris"
+    },
+    {
+      "source": "berardius",
+      "target": "b_bairdii"
+    },
+    {
+      "source": "berardius",
+      "target": "b_arnuxii"
+    },
+    {
+      "source": "berardius",
+      "target": "b_minimus"
+    },
+    {
+      "source": "tasmacetus",
+      "target": "t_shepherdi"
+    },
+    {
+      "source": "hyperoodon",
+      "target": "h_ampullatus"
+    },
+    {
+      "source": "hyperoodon",
+      "target": "h_planifrons"
+    },
+    {
+      "source": "indopacetus",
+      "target": "i_pacificus"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_mirus"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_europaeus"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_bidens"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_densirostris"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_hectori"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_carlhubbsi"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_stejnegeri"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_bowdoini"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_ginkgodens"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_grayi"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_layardii"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_peruvianus"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_perrin"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_perrini"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_traversii"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_hotaula"
+    },
+    {
+      "source": "mesoplodon",
+      "target": "m_eueu"
+    },
+    {
+      "source": "delphinapterus",
+      "target": "d_leucas"
+    },
+    {
+      "source": "monodon",
+      "target": "mo_monoceros"
+    }
+  ],
+  "summary": {
+    "total_species": 44,
+    "total_genera": 13,
+    "total_families": 6,
+    "total_suborders": 2,
+    "mysticeti_species": 15,
+    "odontoceti_species": 29,
+    "conservation_status_breakdown": {
+      "critically_endangered": 2,
+      "endangered": 4,
+      "vulnerable": 2,
+      "near_threatened": 5,
+      "least_concern": 21,
+      "data_deficient": 16
+    },
+    "notes": "Restructured for Chart.js compatibility with nodes and edges arrays. Each node has unique ID, parent references, and children arrays for hierarchical visualization. Updated based on comprehensive research including recent taxonomic changes."
+  }
+}

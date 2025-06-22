@@ -1,0 +1,89 @@
+---
+import '../styles/global.css';
+import WhaleTreeChart from '../components/WhaleTreeChart.svelte';
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Whale Encyclopedia</title>
+  <meta name="description" content="A comprehensive guide to whale species" />
+  <script>
+    // This is needed to ensure Chart.js can access the window object
+    if (typeof window !== 'undefined') {
+      window.ResizeObserver = window.ResizeObserver || class MockResizeObserver {
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        constructor(callback: ResizeObserverCallback) {
+          // Intentionally empty - just a stub for Chart.js
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        observe(element: Element): void {
+          // Intentionally empty - just a stub for Chart.js
+        }
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        unobserve(element: Element): void {
+          // Intentionally empty - just a stub for Chart.js
+        }
+        disconnect(): void {
+          // Intentionally empty - just a stub for Chart.js
+        }
+      };
+    }
+  </script>
+</head>
+<body class="bg-blue-50 text-gray-900 min-h-screen">
+  <header class="bg-blue-800 text-white p-4 md:p-6">
+    <div class="container mx-auto">
+      <h1 class="text-2xl md:text-4xl font-bold text-center">Whale Encyclopedia</h1>
+      <p class="mt-2 text-blue-100 text-center">Discover the magnificent cetaceans of our oceans</p>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-4 md:p-6">
+    <section class="mb-8">
+      <h2 class="text-xl md:text-2xl font-bold mb-4 border-b border-blue-300 pb-2">Whale Taxonomy Tree</h2>
+      <p class="mb-4">
+        Explore the taxonomic classification of whales from order to species level. This interactive visualization shows the hierarchical relationship between different whale groups.
+      </p>
+      <div class="bg-white p-4 rounded-lg shadow-lg">
+        <WhaleTreeChart client:load height="700px" />
+      </div>
+      <p class="text-sm text-gray-600 mt-2 italic text-center">Hover over nodes to see details. The tree shows a subset of species for clarity.</p>
+    </section>
+
+    <section class="mb-8">
+      <h2 class="text-xl md:text-2xl font-bold mb-4 border-b border-blue-300 pb-2">Conservation Status</h2>
+      <p class="mb-4">
+        Many whale species are endangered or threatened due to historical whaling, 
+        habitat loss, climate change, and other human activities.
+      </p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-red-100 p-4 rounded-lg border-l-4 border-red-600">
+          <h3 class="font-bold text-red-800">Critically Endangered</h3>
+          <p class="text-sm mt-1">Facing an extremely high risk of extinction in the wild</p>
+        </div>
+        <div class="bg-orange-100 p-4 rounded-lg border-l-4 border-orange-600">
+          <h3 class="font-bold text-orange-800">Endangered</h3>
+          <p class="text-sm mt-1">Facing a very high risk of extinction in the wild</p>
+        </div>
+        <div class="bg-yellow-100 p-4 rounded-lg border-l-4 border-yellow-600">
+          <h3 class="font-bold text-yellow-800">Vulnerable</h3>
+          <p class="text-sm mt-1">Facing a high risk of extinction in the wild</p>
+        </div>
+        <div class="bg-green-100 p-4 rounded-lg border-l-4 border-green-600">
+          <h3 class="font-bold text-green-800">Least Concern</h3>
+          <p class="text-sm mt-1">Evaluated as not being at risk of extinction in the near future</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="bg-blue-900 text-white p-4 mt-8">
+    <div class="container mx-auto text-center">
+      <p>&copy; {new Date().getFullYear()} Whale Encyclopedia</p>
+      <p class="text-sm text-blue-200 mt-1">Data compiled from scientific research and conservation organizations</p>
+    </div>
+  </footer>
+</body>
+</html>

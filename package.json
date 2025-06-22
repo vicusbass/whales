@@ -1,0 +1,38 @@
+{
+  "name": "whales",
+  "type": "module",
+  "version": "0.0.1",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro check && astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "lint": "eslint . --ext .js,.jsx,.ts,.tsx,.astro",
+    "lint:fix": "eslint . --ext .js,.jsx,.ts,.tsx,.astro --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
+  },
+  "dependencies": {
+    "@astrojs/svelte": "^7.1.0",
+    "@tailwindcss/vite": "^4.1.10",
+    "astro": "^5.10.0",
+    "chart.js": "^4.5.0",
+    "chartjs-chart-graph": "^4.3.4",
+    "svelte": "^5.34.7",
+    "tailwindcss": "^4.1.10"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.0",
+    "@types/chart.js": "^2.9.41",
+    "@typescript-eslint/eslint-plugin": "^8.0.0",
+    "@typescript-eslint/parser": "^8.0.0",
+    "chartjs-plugin-datalabels": "^2.2.0",
+    "eslint": "^9.0.0",
+    "eslint-plugin-astro": "^1.0.0",
+    "prettier": "^3.0.0",
+    "prettier-plugin-astro": "^0.14.0",
+    "prettier-plugin-tailwindcss": "^0.6.0",
+    "typescript": "^5.8.3"
+  }
+}
