@@ -47,6 +47,18 @@ export function generateWhaleTreeView(): string {
       }
     };
     
+    // Get the URL based on node type
+    const getNodeUrl = (node: WhaleNode) => {
+      switch (node.type) {
+        case 'order': return `/order/${node.id}`;
+        case 'suborder': return `/suborder/${node.id}`;
+        case 'family': return `/family/${node.id}`;
+        case 'genus': return `/genus/${node.id}`;
+        case 'species': return `/species/${node.id}`;
+        default: return `#${node.id}`;
+      }
+    };
+    
     const getColor = (type: string) => {
       switch (type) {
         case 'order': return 'text-blue-800';
@@ -63,15 +75,15 @@ export function generateWhaleTreeView(): string {
         <div class="accordion-item" role="treeitem" data-tree-view-item='{"value": "${node.id}", "isDir": true}' data-tree-level="${level}">
           <div class="accordion-heading">
             <div class="flex items-center gap-2 w-full">
-              <button class="accordion-toggle flex items-center justify-center w-6 h-6">
-                <span class="icon-[tabler--plus] plus-icon text-base-content/80 size-4 transition-all duration-300"></span>
-                <span class="icon-[tabler--minus] minus-icon text-base-content/80 size-4 transition-all duration-300 hidden"></span>
+              <button class="accordion-toggle flex items-center justify-center">
+                <span class="icon-[tabler--plus] plus-icon transition-all duration-300"></span>
+                <span class="icon-[tabler--minus] minus-icon transition-all duration-300 hidden"></span>
               </button>
               ${node.type === 'species' ? 
                 `<span class="${getColor(node.type)}">${getIcon(node.type)}</span>` :
                 `<span class="${getIcon(node.type)} ${getColor(node.type)} w-5 h-5"></span>`
               }
-              <span class="font-medium ${getColor(node.type)}">${node.label}</span>
+              <a href="${getNodeUrl(node)}" id="${node.id}" class="tree-item-link ${getColor(node.type)}">${node.label}</a>
               ${node.species_count ? `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${node.species_count} species</span>` : ''}
             </div>
           </div>
@@ -91,12 +103,12 @@ export function generateWhaleTreeView(): string {
               `<span class="${getIcon(node.type)} ${getColor(node.type)} w-5 h-5"></span>`
             }
             ${node.type === 'species' ? 
-              `<a href="/species/${node.id}" class="${getColor(node.type)} hover:underline hover:text-teal-800 transition-colors">
+              `<a href="${getNodeUrl(node)}" id="${node.id}" class="tree-item-link ${getColor(node.type)}">
                 ${node.common_name ? `${node.label} - ${node.common_name}` : node.label}
               </a>` :
-              `<span class="${getColor(node.type)}">
+              `<a href="${getNodeUrl(node)}" id="${node.id}" class="tree-item-link ${getColor(node.type)}">
                 ${node.label}
-              </span>`
+              </a>`
             }
             ${node.species_count ? `<span class="text-xs bg-gray-100 px-2 py-1 rounded">${node.species_count} species</span>` : ''}
           </div>

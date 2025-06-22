@@ -15,16 +15,34 @@ const treeViewHTML = generateWhaleTreeView();
   }
   
   .whale-tree-view :global(.accordion-heading) {
-    padding: 0.5rem 0;
+    padding: 0.75rem 0;
     border: none;
     background: transparent;
   }
   
   .whale-tree-view :global(.accordion-toggle) {
-    background: transparent;
-    border: none;
-    padding: 0.25rem;
-    margin-right: 0.5rem;
+    background: #f0f9ff;
+    border: 1px solid #e0f2fe;
+    border-radius: 4px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    transition: all 0.2s ease;
+  }
+  
+  .whale-tree-view :global(.accordion-toggle:hover) {
+    background: #bae6fd;
+    border-color: #7dd3fc;
+  }
+  
+  .whale-tree-view :global(.plus-icon),
+  .whale-tree-view :global(.minus-icon) {
+    font-size: 16px;
+    font-weight: bold;
+    color: #0284c7;
   }
   
   .whale-tree-view :global(.accordion-content) {
@@ -33,9 +51,26 @@ const treeViewHTML = generateWhaleTreeView();
   }
   
   .whale-tree-view :global(.tree-view-space) {
-    margin-left: 1.5rem;
+    margin-left: 2rem;
     border-left: 2px solid #e5e7eb;
     padding-left: 1rem;
+  }
+  
+  .whale-tree-view :global(.tree-item-label) {
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+  
+  .whale-tree-view :global(.tree-item-link) {
+    font-size: 1.05rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    text-decoration: none;
+  }
+  
+  .whale-tree-view :global(.tree-item-link:hover) {
+    text-decoration: underline;
   }
   
   .whale-tree-view :global(.accordion-item[aria-expanded="true"] .accordion-toggle .plus-icon) {
