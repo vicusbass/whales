@@ -38,16 +38,28 @@ const treeViewHTML = generateWhaleTreeView();
     padding-left: 1rem;
   }
   
-  .whale-tree-view :global(.accordion-item[aria-expanded="true"] .accordion-toggle .chevron-icon) {
-    transform: rotate(90deg);
+  .whale-tree-view :global(.accordion-item[aria-expanded="true"] .accordion-toggle .plus-icon) {
+    display: none;
+  }
+  
+  .whale-tree-view :global(.accordion-item[aria-expanded="true"] .accordion-toggle .minus-icon) {
+    display: inline-block;
+  }
+  
+  .whale-tree-view :global(.accordion-item[aria-expanded="false"] .accordion-toggle .plus-icon) {
+    display: inline-block;
+  }
+  
+  .whale-tree-view :global(.accordion-item[aria-expanded="false"] .accordion-toggle .minus-icon) {
+    display: none;
   }
   
   .whale-tree-view :global(.accordion-toggle) {
     background: transparent;
     border: none;
     padding: 0.25rem;
-    margin-right: 0.5rem;
     cursor: pointer;
+    flex-shrink: 0;
   }
   
   .whale-tree-view :global(.accordion-toggle:hover) {
@@ -67,14 +79,31 @@ const treeViewHTML = generateWhaleTreeView();
       const toggle = (e.target as HTMLElement).closest('.accordion-toggle');
       if (!toggle) return;
       
-      const item = toggle.closest('.accordion-item');
-      const content = item?.querySelector('.accordion-content');
+      const currentItem = toggle.closest('.accordion-item');
+      const currentContent = currentItem?.querySelector('.accordion-content');
       
-      if (item && content) {
-        const isExpanded = item.getAttribute('aria-expanded') === 'true';
-        item.setAttribute('aria-expanded', (!isExpanded).toString());
+      if (currentItem && currentContent) {
+        const isExpanded = currentItem.getAttribute('aria-expanded') === 'true';
+        const currentLevel = currentItem.getAttribute('data-tree-level');
         
-        const contentElement = content as HTMLElement;
+        // Auto-close other items at the same level
+        if (!isExpanded) {
+          const siblingItems = treeView.querySelectorAll(`[data-tree-level="${currentLevel}"]`);
+          siblingItems.forEach(siblingItem => {
+            if (siblingItem !== currentItem && siblingItem.getAttribute('aria-expanded') === 'true') {
+              const siblingContent = siblingItem.querySelector('.accordion-content') as HTMLElement;
+              if (siblingContent) {
+                siblingItem.setAttribute('aria-expanded', 'false');
+                siblingContent.style.display = 'none';
+              }
+            }
+          });
+        }
+        
+        // Toggle current item
+        currentItem.setAttribute('aria-expanded', (!isExpanded).toString());
+        
+        const contentElement = currentContent as HTMLElement;
         if (isExpanded) {
           contentElement.style.display = 'none';
         } else {

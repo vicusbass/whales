@@ -17,6 +17,7 @@
     "@astrojs/svelte": "^7.1.0",
     "@tailwindcss/vite": "^4.1.10",
     "astro": "^5.10.0",
+    "astro-icon": "^1.1.5",
     "chart.js": "^4.5.0",
     "chartjs-chart-graph": "^4.3.4",
     "flyonui": "^2.2.0",
@@ -25,6 +26,8 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.0",
+    "@iconify/json": "^2.2.351",
+    "@iconify/tailwind4": "^1.0.6",
     "@types/chart.js": "^2.9.41",
     "@typescript-eslint/eslint-plugin": "^8.0.0",
     "@typescript-eslint/parser": "^8.0.0",
