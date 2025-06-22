@@ -19,6 +19,7 @@
     "astro": "^5.10.0",
     "chart.js": "^4.5.0",
     "chartjs-chart-graph": "^4.3.4",
+    "flyonui": "^2.2.0",
     "svelte": "^5.34.7",
     "tailwindcss": "^4.1.10"
   },

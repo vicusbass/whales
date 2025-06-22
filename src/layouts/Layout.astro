@@ -1,0 +1,43 @@
+---
+import '../styles/global.css';
+
+export interface Props {
+  title?: string;
+  description?: string;
+}
+
+const { 
+  title = 'Whale Encyclopedia', 
+  description = 'A comprehensive guide to whale species' 
+} = Astro.props;
+---
+
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+</head>
+<body class="bg-blue-50 text-gray-900 min-h-screen">
+  <header class="bg-blue-800 text-white p-4 md:p-6">
+    <div class="container mx-auto">
+      <h1 class="text-2xl md:text-4xl font-bold text-center">Whale Encyclopedia</h1>
+      <p class="mt-2 text-blue-100 text-center">Discover the magnificent cetaceans of our oceans</p>
+    </div>
+  </header>
+
+  <main class="container mx-auto p-4 md:p-6">
+    <slot />
+  </main>
+
+  <footer class="bg-blue-900 text-white p-4 mt-8">
+    <div class="container mx-auto text-center">
+      <p>&copy; {new Date().getFullYear()} Whale Encyclopedia</p>
+      <p class="text-sm text-blue-200 mt-1">Data compiled from scientific research and conservation organizations</p>
+    </div>
+  </footer>
+</body>
+</html>
+
+<script is:inline src="../node_modules/flyonui/dist/accordion.js"></script> 

@@ -1,0 +1,96 @@
+---
+import { generateWhaleTreeView } from '../utils/whaleTreeView';
+
+const treeViewHTML = generateWhaleTreeView();
+---
+
+<div class="whale-tree-view">
+  <Fragment set:html={treeViewHTML} />
+</div>
+
+<style>
+  .whale-tree-view :global(.accordion-item) {
+    border: none;
+    background: transparent;
+  }
+  
+  .whale-tree-view :global(.accordion-heading) {
+    padding: 0.5rem 0;
+    border: none;
+    background: transparent;
+  }
+  
+  .whale-tree-view :global(.accordion-toggle) {
+    background: transparent;
+    border: none;
+    padding: 0.25rem;
+    margin-right: 0.5rem;
+  }
+  
+  .whale-tree-view :global(.accordion-content) {
+    padding: 0;
+    border: none;
+  }
+  
+  .whale-tree-view :global(.tree-view-space) {
+    margin-left: 1.5rem;
+    border-left: 2px solid #e5e7eb;
+    padding-left: 1rem;
+  }
+  
+  .whale-tree-view :global(.accordion-item[aria-expanded="true"] .accordion-toggle .chevron-icon) {
+    transform: rotate(90deg);
+  }
+  
+  .whale-tree-view :global(.accordion-toggle) {
+    background: transparent;
+    border: none;
+    padding: 0.25rem;
+    margin-right: 0.5rem;
+    cursor: pointer;
+  }
+  
+  .whale-tree-view :global(.accordion-toggle:hover) {
+    background-color: #f3f4f6;
+    border-radius: 0.25rem;
+  }
+</style>
+
+<script>
+  // Initialize accordion functionality for tree view
+  document.addEventListener('DOMContentLoaded', () => {
+    const treeView = document.querySelector('[data-tree-view]');
+    if (!treeView) return;
+    
+    // Add click handlers for accordion toggles
+    treeView.addEventListener('click', (e) => {
+      const toggle = (e.target as HTMLElement).closest('.accordion-toggle');
+      if (!toggle) return;
+      
+      const item = toggle.closest('.accordion-item');
+      const content = item?.querySelector('.accordion-content');
+      
+      if (item && content) {
+        const isExpanded = item.getAttribute('aria-expanded') === 'true';
+        item.setAttribute('aria-expanded', (!isExpanded).toString());
+        
+        const contentElement = content as HTMLElement;
+        if (isExpanded) {
+          contentElement.style.display = 'none';
+        } else {
+          contentElement.style.display = 'block';
+        }
+      }
+    });
+    
+    // Initialize all items as collapsed
+    const allItems = treeView.querySelectorAll('.accordion-item');
+    allItems.forEach(item => {
+      item.setAttribute('aria-expanded', 'false');
+      const content = item.querySelector('.accordion-content') as HTMLElement;
+      if (content) {
+        content.style.display = 'none';
+      }
+    });
+  });
+</script>
