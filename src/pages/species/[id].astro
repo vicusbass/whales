@@ -66,8 +66,9 @@ export async function getStaticPaths() {
 const { species } = Astro.props as { species: WhaleSpecies };
 
 // Get frame color based on IUCN status
-const getFrameColor = (status: string) => {
-  switch (status?.toLowerCase()) {
+const getFrameColor = (status: string | undefined) => {
+  if (!status) return 'border-gray-400 shadow-gray-200';
+  switch (status.toLowerCase()) {
     case 'critically endangered':
       return 'border-red-600 shadow-red-200';
     case 'endangered':

@@ -44,18 +44,18 @@ function buildHierarchy(genusId: string, whales: WhaleNode[]): WhaleNode[] {
   
   // Find the complete parent hierarchy of this genus
   function findParents(genusId: string): { family: WhaleNode | null, suborder: WhaleNode | null, order: WhaleNode | null } {
-    const genus = whales.find((node: WhaleNode) => node.id === genusId);
+    const genus = whales.find((node: WhaleNode) => node.id === genusId) || null;
     if (!genus || !genus.parent) return { family: null, suborder: null, order: null };
     
-    const family = whales.find((node: WhaleNode) => node.id === genus.parent);
+    const family = whales.find((node: WhaleNode) => node.id === genus.parent) || null;
     if (!family || !family.parent) return { family, suborder: null, order: null };
     
-    const suborder = whales.find((node: WhaleNode) => node.id === family.parent);
-    if (!suborder || !suborder.parent) return { family, suborder: suborder || null, order: null };
+    const suborder = whales.find((node: WhaleNode) => node.id === family.parent) || null;
+    if (!suborder || !suborder.parent) return { family, suborder, order: null };
     
-    const order = whales.find((node: WhaleNode) => node.id === suborder.parent);
+    const order = whales.find((node: WhaleNode) => node.id === suborder.parent) || null;
     
-    return { family, suborder: suborder || null, order: order || null };
+    return { family, suborder, order };
   }
 
   const { family, suborder, order } = findParents(genusId);
