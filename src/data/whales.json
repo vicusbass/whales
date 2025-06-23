@@ -4,7 +4,7 @@
       "id": "cetacea",
       "label": "Order Cetacea",
       "type": "order",
-      "description": "Marine mammals including all whales, dolphins, and porpoises",
+      "description": "All whales",
       "children": ["mysticeti", "odontoceti"]
     },
     {
@@ -477,7 +477,8 @@
       "description": "Medium-sized beaked whale (7-9m) found exclusively in North Atlantic deep waters, renowned for extreme diving ability reaching 2,339m depth for up to 130 minutes. Males develop distinctive flattened square melon with age, while females retain more rounded foreheads. Known for curious behavior toward ships and lives in small social groups.",
       "iucn_status": "Near Threatened",
       "size": "7-9m",
-      "weight": "5-7.5 tons"
+      "weight": "5-7.5 tons",
+      "author": "By Sanna Isojunno - https://forskning.no/havforskning-partner-sjodyr/sonar-forsok-pa-hval-ved-jan-mayen-nebbhvaler-reagerer-voldsomt-pa-militaere-ubatjakt-sonarer/1334043, CC BY-SA 4.0, https://commons.wikimedia.org/w/index.php?curid=122725214"
     },
     {
       "id": "h_planifrons",
@@ -664,7 +665,8 @@
       "description": "The rarest beaked whale species, known from only six confirmed specimens since 1872 (five from New Zealand, one from Chile). Estimated to reach 5.0-5.5m length based on skull size, with extremely large spade-shaped teeth (23cm) in males. Never definitively observed alive, so behavior and ecology are unknown but presumed similar to other Mesoplodon species. The 2010 mother-calf pair provided first external appearance data showing dark grey/black dorsally, white ventrally.",
       "iucn_status": "Data Deficient",
       "size": "5.0-5.5m",
-      "weight": "1.5 tons"
+      "weight": "1.5 tons",
+      "author":"By This W3C-unspecified vector image was created with Inkscape . - Own work, CC BY 3.0, https://commons.wikimedia.org/w/index.php?curid=22666932"
     },
     {
       "id": "m_hotaula",

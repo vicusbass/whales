@@ -1,1 +1,50 @@
 @import "tailwindcss";
+@plugin "@iconify/tailwind4";
+@plugin "flyonui";
+@import "flyonui/variants.css";
+@source "../node_modules/flyonui/flyonui.js";
+
+@theme {
+    --font-sans: 'Nunito Sans', 'sans-serif';
+    --font-heading: 'Poppins', 'sans-serif';
+    --font-max: 'Dela Gothic One', 'display';
+    --color-body: #fafbfc;
+    --color-strong: #0369a1;
+    --color-accent: #67e8f9;
+    --color-light: #f8f9fa;
+}
+
+@layer base {
+    body {
+        @apply text-gray-900 bg-body;
+    }
+    h1 {
+        @apply font-max;
+    }
+    h2, h3, h4, h5, h6 {
+        @apply font-heading;
+    }
+}
+
+@layer utilities {
+    .bg-body {
+        background-color: var(--color-body);
+    }
+
+    .bg-nav {
+        background-color: var(--color-strong);
+    }
+
+    .bg-light {
+        background-color: var(--color-light);
+    }
+
+    .bg-accent {
+        background-color: var(--color-accent);
+        &:hover {
+            background-color: var(--color-body);
+        }
+    }
+}
+    
+    
