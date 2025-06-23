@@ -64,7 +64,6 @@ export async function getStaticPaths() {
 }
 
 const { species } = Astro.props as { species: WhaleSpecies };
-console.log(JSON.stringify(species));
 
 // Get frame color based on IUCN status
 const getFrameColor = (status: string) => {
@@ -111,7 +110,7 @@ const frameColor = getFrameColor(species.iucn_status);
                     {node.common_name || node.label}
                   </span>
                 ) : (
-                  <a href={`#${node.id}`} class="hover:text-blue-600">
+                  <a href={`/${node.type}/${node.id}`} class="hover:text-blue-600">
                     {node.type === 'suborder' || node.type === 'family' || node.type === 'genus' 
                       ? node.label.split(' ')[0] // Just show the first part of the label (without parentheses)
                       : node.label}
@@ -132,9 +131,9 @@ const frameColor = getFrameColor(species.iucn_status);
         <div class="md:order-2 md:w-1/2 lg:w-7/12 xl:w-3/5 mb-8 md:mb-0">
           <!-- Species Image with IUCN Status Frame -->
           <div class={`block w-full max-w-none mx-auto md:mx-0 p-4 sm:p-6 lg:p-8 border-4 rounded-2xl shadow-2xl ${frameColor} bg-white transition-all duration-300 hover:shadow-3xl`}>
-            <div class="w-full aspect-[4/3] bg-gray-100 rounded-lg overflow-hidden relative">
+            <div class="w-full bg-gray-100 rounded-lg overflow-hidden relative">
               {/* Whale image with dynamic loading and fallback */}
-              <div class="w-full h-full">
+              <div class="w-full">
                 {(() => {
                   // Check if we have an image for this whale species
                   const imagePath = `/src/assets/${species.id}.webp`;
@@ -145,9 +144,9 @@ const frameColor = getFrameColor(species.iucn_status);
                       <Image 
                         src={whaleImages[imagePath]()} 
                         alt={`${species.common_name || species.label}`}
-                        width={800}
-                        height={600}
-                        class="w-full h-full object-cover"
+                        width={1000}
+                        height={800}
+                        class="w-full object-contain max-h-[600px]"
                         loading="eager"
                       />
                     );
@@ -160,9 +159,9 @@ const frameColor = getFrameColor(species.iucn_status);
                       <Image 
                         src={whaleImages[jpgPath]()} 
                         alt={`${species.common_name || species.label}`}
-                        width={800}
-                        height={600}
-                        class="w-full h-full object-cover"
+                        width={1000}
+                        height={800}
+                        class="w-full object-contain max-h-[600px]"
                         loading="eager"
                       />
                     );
@@ -174,9 +173,9 @@ const frameColor = getFrameColor(species.iucn_status);
                       <Image 
                         src={whaleImages[pngPath]()} 
                         alt={`${species.common_name || species.label}`}
-                        width={800}
-                        height={600}
-                        class="w-full h-full object-cover"
+                        width={1000}
+                        height={800}
+                        class="w-full object-contain max-h-[600px]"
                         loading="eager"
                       />
                     );

@@ -1,0 +1,108 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SpeciesCard from '../../components/SpeciesCard.astro';
+import whalesData from '../../data/whales.json';
+
+// Define whale node type
+type WhaleNode = {
+  id: string;
+  label: string;
+  type: string;
+  parent?: string;
+  children?: string[];
+  description?: string;
+  common_name?: string;
+  iucn_status?: string;
+  size?: string;
+  weight?: string;
+  species_count?: number;
+  author?: string;
+};
+
+export async function getStaticPaths() {
+  // Access the nodes array from the whales data inside getStaticPaths
+  const whales = whalesData.nodes;
+  
+  const families = whales.filter((node: WhaleNode) => node.type === 'family');
+  
+  return families.map((family: WhaleNode) => {
+    return {
+      params: { id: family.id },
+      props: { family, whales } // Pass whales data to the component
+    };
+  });
+}
+
+// Find all species that belong to this family
+function findSpeciesInFamily(familyId: string, whales: WhaleNode[]): WhaleNode[] {
+  // First, find all genera in this family
+  const genera = whales.filter((node: WhaleNode) => node.type === 'genus' && node.parent === familyId);
+  
+  // Then find all species in these genera
+  const species: WhaleNode[] = [];
+  for (const genus of genera) {
+    const genusSpecies = whales.filter((node: WhaleNode) => node.type === 'species' && node.parent === genus.id);
+    species.push(...genusSpecies);
+  }
+  
+  return species;
+}
+
+// Find the parent suborder and order of this family
+function findFamilyHierarchy(familyId: string, whales: WhaleNode[]): { suborder: WhaleNode | null, order: WhaleNode | null } {
+  const family = whales.find((node: WhaleNode) => node.id === familyId);
+  if (!family) return { suborder: null, order: null };
+  
+  const suborder = whales.find((node: WhaleNode) => node.id === family.parent) || null;
+  if (!suborder) return { suborder: null, order: null };
+  
+  const order = whales.find((node: WhaleNode) => node.id === suborder.parent) || null;
+  
+  return { suborder, order };
+}
+
+const { family, whales } = Astro.props;
+const species = findSpeciesInFamily(family.id, whales);
+const { suborder: parentSuborder, order: parentOrder } = findFamilyHierarchy(family.id, whales);
+---
+
+<Layout title={`${family.label} Family`} description={`Explore all whale species in the ${family.label} family`}>
+  <nav class="mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm px-4 sm:px-0">
+    <ol class="flex flex-wrap items-center text-gray-600">
+      <li><a href="/" class="hover:text-blue-600">Home</a></li>
+      
+      {parentOrder && (
+        <li class="before:content-['›'] before:mx-1 sm:before:mx-2">
+          <a href={`/order/${parentOrder.id}`} class="hover:text-blue-600">
+            {parentOrder.label}
+          </a>
+        </li>
+      )}
+      
+      {parentSuborder && (
+        <li class="before:content-['›'] before:mx-1 sm:before:mx-2">
+          <a href={`/suborder/${parentSuborder.id}`} class="hover:text-blue-600">
+            {parentSuborder.label}
+          </a>
+        </li>
+      )}
+      
+      <li class="before:content-['›'] before:mx-1 sm:before:mx-2">
+        <span class="text-gray-900 font-medium">{family.label}</span>
+      </li>
+    </ol>
+  </nav>
+
+  <h1 class="text-3xl md:text-4xl font-bold mb-2">{family.label}</h1>
+  {family.common_name && <p class="text-xl text-gray-700 mb-6">{family.common_name}</p>}
+  
+  {family.description && <div class="prose max-w-none mb-8">{family.description}</div>}
+  
+  <h2 class="text-2xl font-bold mb-4">Species in this Family</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {species.map((speciesItem) => (
+      <SpeciesCard species={speciesItem} />
+    ))}
+  </div>
+</Layout>

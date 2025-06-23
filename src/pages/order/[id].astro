@@ -1,0 +1,92 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SpeciesCard from '../../components/SpeciesCard.astro';
+import whalesData from '../../data/whales.json';
+
+// Define whale node type
+type WhaleNode = {
+  id: string;
+  label: string;
+  type: string;
+  parent?: string;
+  children?: string[];
+  description?: string;
+  common_name?: string;
+  iucn_status?: string;
+  size?: string;
+  weight?: string;
+  species_count?: number;
+  author?: string;
+};
+
+export async function getStaticPaths() {
+  // Access the nodes array from the whales data inside getStaticPaths
+  const whales = whalesData.nodes;
+  
+  const orders = whales.filter((node: WhaleNode) => node.type === 'order');
+  
+  return orders.map((order: WhaleNode) => {
+    return {
+      params: { id: order.id },
+      props: { order, whales } // Pass whales data to the component
+    };
+  });
+}
+
+// Find all species that belong to this order
+function findSpeciesInOrder(orderId: string, whales: WhaleNode[]): WhaleNode[] {
+  // First, find all suborders in this order
+  const suborders = whales.filter((node: WhaleNode) => node.type === 'suborder' && node.parent === orderId);
+  
+  // Then find all families in these suborders
+  const families: WhaleNode[] = [];
+  for (const suborder of suborders) {
+    const suborderFamilies = whales.filter((node: WhaleNode) => node.type === 'family' && node.parent === suborder.id);
+    families.push(...suborderFamilies);
+  }
+  
+  // Then find all genera in these families
+  const genera: WhaleNode[] = [];
+  for (const family of families) {
+    const familyGenera = whales.filter((node: WhaleNode) => node.type === 'genus' && node.parent === family.id);
+    genera.push(...familyGenera);
+  }
+  
+  // Finally, find all species in these genera
+  const species: WhaleNode[] = [];
+  for (const genus of genera) {
+    const genusSpecies = whales.filter((node: WhaleNode) => node.type === 'species' && node.parent === genus.id);
+    species.push(...genusSpecies);
+  }
+  
+  return species;
+}
+
+const { order, whales } = Astro.props;
+const species = findSpeciesInOrder(order.id, whales);
+---
+
+<Layout title={`${order.label} Order`} description={`Explore all whale species in the ${order.label} order`}>
+  <nav class="mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm px-4 sm:px-0">
+    <ol class="flex flex-wrap items-center text-gray-600">
+      <li><a href="/" class="hover:text-blue-600">Home</a></li>
+      
+      <li class="before:content-['›'] before:mx-1 sm:before:mx-2">
+        <span class="text-gray-900 font-medium">{order.label}</span>
+      </li>
+    </ol>
+  </nav>
+
+  <h1 class="text-3xl md:text-4xl font-bold mb-2">{order.label}</h1>
+  {order.common_name && <p class="text-xl text-gray-700 mb-6">{order.common_name}</p>}
+  
+  {order.description && <div class="prose max-w-none mb-8">{order.description}</div>}
+  
+  <h2 class="text-2xl font-bold mb-4">All Species in this Order</h2>
+  
+  <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    {species.map((speciesItem) => (
+      <SpeciesCard species={speciesItem} />
+    ))}
+  </div>
+</Layout>
