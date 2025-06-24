@@ -48,12 +48,12 @@ const statusColor = getStatusColor(species.iucn_status);
 <div class="relative w-full h-full">
   <span class={`absolute top-0 left-0 w-full h-full mt-1 ml-1 ${statusColor.bg} rounded-lg`}></span>
   <a href={`/species/${species.id}`} class={`relative flex flex-col h-full p-3 bg-white border-2 ${statusColor.border} rounded-lg hover:shadow-lg transition-shadow`}>
-    <div class="relative w-full h-48 bg-gray-200 rounded mb-3 flex-shrink-0">
+    <div class="relative w-full h-48 bg-gray-200 rounded mb-3 flex-shrink-0 overflow-hidden">
       {imageModule ? (
         <Image 
           src={imageModule.default} 
           alt={species.common_name || species.label} 
-          class="object-cover w-full h-full rounded"
+          class="object-contain w-full h-full rounded"
           width={400}
           height={300}
         />

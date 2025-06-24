@@ -2,14 +2,14 @@ import { defineConfig } from 'astro/config';
 
 import tailwindcss from '@tailwindcss/vite';
 
-import svelte from '@astrojs/svelte';
-
 import icon from 'astro-icon';
+
+import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   vite: {
     plugins: [tailwindcss()]
   },
-
-  integrations: [svelte(), icon()]
+  site: 'https://whales.rocks',
+  integrations: [icon(), sitemap()]
 });
