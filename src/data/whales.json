@@ -257,7 +257,8 @@
       "description": "Medium-sized tropical rorqual reaching 12-15m (40-50ft), distinguished by three prominent parallel ridges on the rostrum and preference for warm waters between 40°N and 40°S. Often confused with sei whales but found year-round in tropical waters rather than migrating. Taxonomic status remains complex with potential subspecies differentiation and frequent confusion with related species.",
       "iucn_status": "Data Deficient",
       "size": "12-15m",
-      "weight": "12-25 tons"
+      "weight": "12-25 tons",
+      "author":"By Morningdew - Selbst erstellt, Olympus mju4; mit Photoshop bearbeitet u. reduziert, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1006683"
     },
     {
       "id": "b_ricei",
@@ -268,7 +269,8 @@
       "description": "Recently recognized species (2021) endemic to the Gulf of Mexico, reaching up to 12.65m (41.5ft) and 27 tons, virtually identical in appearance to Bryde's whale but genetically and morphologically distinct. Found exclusively along the continental slope at 150-410m depth, feeding near the seafloor on fish rather than krill. One of the world's most critically endangered large whales.",
       "iucn_status": "Critically Endangered",
       "size": "up to 12.65m",
-      "weight": "up to 27 tons"
+      "weight": "up to 27 tons",
+      "author":"By National Oceanic and Atmospheric Association (NOAA) - https://www.msn.com/en-us/news/us/new-whale-species-discovered-in-the-gulf-of-mexico-%E2%80%94-but-its-already-going-extinct/ar-BB1d9oOU, Public Domain, https://commons.wikimedia.org/w/index.php?curid=99713106"
     },
     {
       "id": "b_musculus",
@@ -290,7 +292,8 @@
       "description": "Recently described species (2003) reaching 10-12m (33-39ft), closely related to Bryde's whales but smaller with distinctive asymmetrical coloration similar to fin whales and fewer baleen plates than other rorquals. Found primarily in tropical Indo-Pacific waters, with some populations apparently non-migratory. Extremely poorly known with very few confirmed sightings.",
       "iucn_status": "Data Deficient",
       "size": "10-12m",
-      "weight": "15-20 tons"
+      "weight": "15-20 tons",
+      "author": "By Salvatore Cerchio et al. / Royal Society Open Science - Royal Society Open Science, CC BY 4.0, https://commons.wikimedia.org/w/index.php?curid=44630087"
     },
     {
       "id": "b_physalus",
@@ -312,7 +315,8 @@
       "description": "Distinctive medium-sized whale reaching 14-17m (46-56ft) and up to 40 tons, famous for extremely long pectoral fins, complex songs, and spectacular breaching behavior. Found in all oceans with extensive migrations between polar feeding and tropical breeding areas. Notable conservation success story with population recovery from near extinction to approximately 135,000 individuals worldwide.",
       "iucn_status": "Least Concern",
       "size": "14-17m",
-      "weight": "up to 40 tons"
+      "weight": "up to 40 tons",
+      "author": "Public Domain, https://commons.wikimedia.org/w/index.php?curid=594115"
     },
     {
       "id": "e_australis",
@@ -345,7 +349,8 @@
       "description": "One of the most critically endangered large whales, reaching 14m (45ft) and 45-54 tons, with a distinctive stocky black body, strongly arched jawline, and prominent white callosities on the head. Found exclusively in North Atlantic coastal waters, migrating between Labrador Sea feeding grounds and Georgia/Florida calving areas. Known for slow surface-skimming feeding on copepods, with fewer than 250 mature individuals remaining.",
       "iucn_status": "Critically Endangered",
       "size": "up to 14m",
-      "weight": "45-54 tons"
+      "weight": "45-54 tons",
+      "author": "By National Marine Sanctuaries - GRNMS - Right Whales, Public Domain, https://commons.wikimedia.org/w/index.php?curid=95413038"
     },
     {
       "id": "b_mysticetus",
