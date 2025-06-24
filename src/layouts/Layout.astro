@@ -1,6 +1,7 @@
 ---
 import '../styles/global.css';
 import { Image } from 'astro:assets';
+import Analytics from '@vercel/analytics/astro'
 import whaleIcon from '../assets/whale.svg';
 
 export interface Props {
@@ -78,6 +79,7 @@ const {
       </div>
     </div>
   </footer>
+  <Analytics />
 </body>
 </html>
 
