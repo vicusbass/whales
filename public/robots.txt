@@ -1,0 +1,36 @@
+User-agent: *
+Allow: /
+
+# Allow Google bots
+User-agent: Googlebot
+Allow: /
+
+# Allow Google Mobile
+User-agent: Googlebot-Mobile
+Allow: /
+
+# Allow Google Image
+User-agent: Googlebot-Image
+Allow: /
+
+# Allow AI bots
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: Anthropic-AI
+Allow: /
+
+User-agent: Claude-Web
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+# Sitemap location
+Sitemap: https://whales.rocks/sitemap.xml

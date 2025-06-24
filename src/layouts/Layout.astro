@@ -20,6 +20,31 @@ const {
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>{title}</title>
   <meta name="description" content={description} />
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  
+  <!-- SEO Meta Tags -->
+  <meta name="author" content="Vic and Andrei Pop" />
+  <meta name="keywords" content="whales, cetaceans, marine mammals, ocean, conservation, endangered species, whale species, whale encyclopedia" />
+  <meta property="og:title" content={title} />
+  <meta property="og:description" content={description} />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://whales.rocks" />
+  <meta property="og:image" content="https://whales.rocks/og-image.png" />
+  <meta property="og:site_name" content="Whale Encyclopedia" />
+  
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content={title} />
+  <meta name="twitter:description" content={description} />
+  <meta name="twitter:image" content="https://whales.rocks/og-image.png" />
+  
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://whales.rocks" />
+  
+  <!-- Sitemap -->
+  <link rel="sitemap" href="/sitemap-index.xml" />
 </head>
 <body class="min-h-screen flex flex-col">
   <header class="bg-nav text-white p-4 md:p-6">
