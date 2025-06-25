@@ -4,7 +4,7 @@ import { generateWhaleTreeView } from '../utils/whaleTreeView';
 const treeViewHTML = generateWhaleTreeView();
 ---
 
-<div class="whale-tree-view bg-light">
+<div class="whale-tree-view p-2 md:p-4 rounded-lg shadow-md" style="background-color: #e0f2fe;">
   <Fragment set:html={treeViewHTML} />
 </div>
 
@@ -22,25 +22,27 @@ const treeViewHTML = generateWhaleTreeView();
   
   .whale-tree-view :global(.accordion-toggle) {
     background: #f0f9ff;
-    border: 1px solid #e0f2fe;
-    border-radius: 4px;
-    width: 24px;
-    height: 24px;
+    border: 2px solid #7dd3fc;
+    border-radius: 6px;
+    width: 32px;
+    height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-right: 0.75rem;
     transition: all 0.2s ease;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   }
   
   .whale-tree-view :global(.accordion-toggle:hover) {
     background: #bae6fd;
-    border-color: #7dd3fc;
+    border-color: #0284c7;
+    transform: scale(1.05);
   }
   
   .whale-tree-view :global(.plus-icon),
   .whale-tree-view :global(.minus-icon) {
-    font-size: 16px;
+    font-size: 24px;
     font-weight: bold;
     color: #0284c7;
   }
@@ -57,16 +59,69 @@ const treeViewHTML = generateWhaleTreeView();
   }
   
   .whale-tree-view :global(.tree-item-label) {
-    font-size: 1.05rem;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 600;
     transition: all 0.2s ease;
   }
   
   .whale-tree-view :global(.tree-item-link) {
-    font-size: 1.05rem;
-    font-weight: 500;
+    font-size: 1.25rem;
+    font-weight: 600;
     transition: all 0.2s ease;
     text-decoration: none;
+  }
+  
+  /* Responsive styles for mobile */
+  @media (max-width: 768px) {
+    .whale-tree-view :global(.tree-item-link) {
+      font-size: 1rem;
+    }
+    
+    .whale-tree-view :global(.tree-item-label) {
+      font-size: 1rem;
+    }
+    
+    .whale-tree-view :global(.plus-icon),
+    .whale-tree-view :global(.minus-icon) {
+      font-size: 20px;
+    }
+    
+    .whale-tree-view :global(.accordion-toggle) {
+      width: 28px;
+      height: 28px;
+    }
+    
+    .whale-tree-view :global(.tree-view-space) {
+      margin-left: 1.5rem;
+      padding-left: 0.75rem;
+    }
+  }
+  
+  /* Even smaller for very small screens */
+  @media (max-width: 480px) {
+    .whale-tree-view :global(.tree-item-link) {
+      font-size: 0.9rem;
+    }
+    
+    .whale-tree-view :global(.tree-item-label) {
+      font-size: 0.9rem;
+    }
+    
+    .whale-tree-view :global(.plus-icon),
+    .whale-tree-view :global(.minus-icon) {
+      font-size: 18px;
+    }
+    
+    .whale-tree-view :global(.accordion-toggle) {
+      width: 24px;
+      height: 24px;
+      margin-right: 0.5rem;
+    }
+    
+    .whale-tree-view :global(.tree-view-space) {
+      margin-left: 1rem;
+      padding-left: 0.5rem;
+    }
   }
   
   .whale-tree-view :global(.tree-item-link:hover) {
@@ -90,16 +145,19 @@ const treeViewHTML = generateWhaleTreeView();
   }
   
   .whale-tree-view :global(.accordion-toggle) {
-    background: transparent;
-    border: none;
+    background: #e0f2fe;
+    border: 2px solid #7dd3fc;
     padding: 0.25rem;
     cursor: pointer;
     flex-shrink: 0;
+    border-radius: 6px;
   }
   
   .whale-tree-view :global(.accordion-toggle:hover) {
-    background-color: #f3f4f6;
-    border-radius: 0.25rem;
+    background-color: #bae6fd;
+    border-color: #0284c7;
+    border-radius: 6px;
+    transform: scale(1.05);
   }
 </style>
 
@@ -147,13 +205,18 @@ const treeViewHTML = generateWhaleTreeView();
       }
     });
     
-    // Initialize all items as collapsed
+    // Initialize items - first level expanded, others collapsed
     const allItems = treeView.querySelectorAll('.accordion-item');
     allItems.forEach(item => {
-      item.setAttribute('aria-expanded', 'false');
+      const level = parseInt(item.getAttribute('data-tree-level') || '0');
+      const isFirstLevel = level === 0;
+      
+      // Set first level to expanded, others to collapsed
+      item.setAttribute('aria-expanded', isFirstLevel ? 'true' : 'false');
+      
       const content = item.querySelector('.accordion-content') as HTMLElement;
       if (content) {
-        content.style.display = 'none';
+        content.style.display = isFirstLevel ? 'block' : 'none';
       }
     });
   });
