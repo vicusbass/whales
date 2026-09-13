@@ -1,3 +1,18 @@
+/* Webfonts — must load before Tailwind so @font-face is registered.
+   Family names below must match what these packages declare:
+   @fontsource-variable/nunito-sans registers "Nunito Sans Variable", not "Nunito Sans".
+   Only latin subsets are pulled in — the site is English, and Dela Gothic One
+   ships 100+ Japanese subset files we would otherwise inline into the CSS. */
+@import "@fontsource-variable/nunito-sans";
+@import "@fontsource/poppins/latin-400.css";
+@import "@fontsource/poppins/latin-ext-400.css";
+@import "@fontsource/poppins/latin-600.css";
+@import "@fontsource/poppins/latin-ext-600.css";
+@import "@fontsource/poppins/latin-700.css";
+@import "@fontsource/poppins/latin-ext-700.css";
+@import "@fontsource/dela-gothic-one/latin-400.css";
+@import "@fontsource/dela-gothic-one/latin-ext-400.css";
+
 @import "tailwindcss";
 @plugin "@iconify/tailwind4";
 @plugin "flyonui";
@@ -5,9 +20,11 @@
 @source "../node_modules/flyonui/flyonui.js";
 
 @theme {
-    --font-sans: 'Nunito Sans', 'sans-serif';
-    --font-heading: 'Poppins', 'sans-serif';
-    --font-max: 'Dela Gothic One', 'display';
+    /* Generic families must be unquoted — a quoted 'sans-serif' is parsed as a
+       font *named* "sans-serif", which leaves no valid fallback. */
+    --font-sans: 'Nunito Sans Variable', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Poppins', ui-sans-serif, system-ui, sans-serif;
+    --font-max: 'Dela Gothic One', ui-sans-serif, system-ui, sans-serif;
     --color-body: #fafbfc;
     --color-strong: #0369a1;
     --color-accent: #67e8f9;
