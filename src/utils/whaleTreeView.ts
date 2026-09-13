@@ -1,5 +1,5 @@
-// Import whale data with type assertion to avoid TypeScript errors
-import whaleData from '../data/whales.json' assert { type: 'json' };
+// Import whale data (Vite resolves JSON imports; tsconfig has resolveJsonModule)
+import whaleData from '../data/whales.json';
 
 // Define interfaces for the whale data structure
 interface WhaleNode {
