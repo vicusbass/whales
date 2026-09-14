@@ -11,9 +11,4 @@ export async function getStaticPaths() {
 const { taxon } = Astro.props as { taxon: WhaleNode };
 ---
 
-<TaxonPage
-  taxon={taxon}
-  heading="Species in this Family"
-  title={`${taxon.label} Family`}
-  description={`Explore all whale species in the ${taxon.label} family`}
-/>
+<TaxonPage taxon={taxon} heading="Species in this Family" />

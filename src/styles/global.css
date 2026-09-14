@@ -28,9 +28,6 @@
 
 @import 'tailwindcss';
 @plugin '@iconify/tailwind4';
-@plugin 'flyonui';
-@import 'flyonui/variants.css';
-@source '../node_modules/flyonui/flyonui.js';
 
 @theme {
   /* Generic families must be unquoted — a quoted 'sans-serif' is parsed as a
@@ -173,7 +170,11 @@ html[data-theme='classic'] {
     text-rendering: optimizeLegibility;
   }
 
-  h1 {
+  h1,
+  /* For elements that look like the page's biggest heading but must not be
+     one — the site name in the Classic header, and headings demoted so that
+     each document keeps a single <h1>. */
+  .t-h1 {
     font-family: var(--font-h1);
   }
 

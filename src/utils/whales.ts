@@ -97,6 +97,38 @@ export function commonLabel(label: string): string {
   return m ? m[1].trim() : '';
 }
 
+/**
+ * The bare scientific name of a taxon above species level.
+ *
+ * Strips both the parenthetical vernacular ("Balaenopteridae (Rorquals)") and
+ * a rank word the dataset put in the label itself ("Order Cetacea") — the page
+ * states the rank separately, so repeating it reads as a stutter.
+ */
+export function sciName(node: WhaleNode): string {
+  return shortLabel(node.label).replace(
+    /^(Order|Suborder|Family|Genus)\s+/i,
+    ''
+  );
+}
+
+/**
+ * Full binomial for a species: "B. musculus" -> "Balaenoptera musculus".
+ *
+ * whales.json stores species labels abbreviated the way a field guide prints
+ * them once the genus is established by context. On a page that is reached
+ * directly from a search result there is no such context, and the abbreviated
+ * form is not something anyone searches for, so the genus is expanded from the
+ * parent node. Falls back to the stored label if the parent is missing.
+ */
+export function binomialOf(species: WhaleNode): string {
+  const genus = species.parent ? byId[species.parent] : undefined;
+  if (!genus) return species.label;
+  const epithet = species.label.replace(/^[A-Z]\.\s*/, '');
+  // Nothing was abbreviated — the label already carries a full genus name.
+  if (epithet === species.label) return species.label;
+  return `${shortLabel(genus.label)} ${epithet}`;
+}
+
 const imageModules = import.meta.glob<{ default: ImageMetadata }>(
   '/src/assets/*.{jpeg,jpg,png,gif,webp}',
   { eager: true }
@@ -114,7 +146,10 @@ export function imageFor(speciesId: string): ImageMetadata | null {
 export interface SpeciesEntry {
   id: string;
   common: string;
+  /** Abbreviated, as the cards print it: "B. musculus". */
   sci: string;
+  /** Expanded: "Balaenoptera musculus". Searchable even where not displayed. */
+  binomial: string;
   iucn: string;
   iucnColor: string;
   genus: string;
@@ -137,6 +172,7 @@ export const allSpecies: SpeciesEntry[] = nodes
       id: n.id,
       common: n.common_name || n.label,
       sci: n.label,
+      binomial: binomialOf(n),
       iucn: n.iucn_status || 'Data Deficient',
       iucnColor: iucnColor(n.iucn_status),
       genus: genus?.label ?? '',
