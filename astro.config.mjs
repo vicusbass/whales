@@ -8,8 +8,8 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   vite: {
-    plugins: [tailwindcss()]
+    plugins: [tailwindcss()],
   },
   site: 'https://whales.rocks',
-  integrations: [icon(), sitemap()]
+  integrations: [icon(), sitemap()],
 });

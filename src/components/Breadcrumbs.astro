@@ -1,0 +1,114 @@
+---
+import { shortLabel, type WhaleNode } from '../utils/whales';
+
+export interface Props {
+  /** Order → … → current node. The last entry renders as plain text. */
+  trail: WhaleNode[];
+}
+
+const { trail } = Astro.props;
+
+/** Species keep their full binomial; higher ranks drop the parenthetical. */
+function label(node: WhaleNode) {
+  if (node.type === 'species') return node.common_name || node.label;
+  return shortLabel(node.label);
+}
+---
+
+<nav class="crumbs" aria-label="Breadcrumb">
+  <ol>
+    <li><a href="/">Home</a></li>
+    {
+      trail.map((node, i) => (
+        <li>
+          {i === trail.length - 1 ? (
+            <span aria-current="page">{label(node)}</span>
+          ) : (
+            <a href={`/${node.type}/${node.id}`}>{label(node)}</a>
+          )}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  .crumbs {
+    margin: 0 0 20px;
+  }
+
+  .crumbs ol {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: 12px;
+    color: var(--faint);
+  }
+
+  .crumbs li + li::before {
+    content: '›';
+    margin-right: 6px;
+    opacity: 0.5;
+  }
+
+  .crumbs a {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .crumbs a:hover {
+    color: var(--accent);
+  }
+
+  .crumbs [aria-current='page'] {
+    color: var(--muted);
+  }
+
+  /* --- Classic ----------------------------------------------------------- */
+
+  :global(html[data-theme='classic']) .crumbs {
+    margin-bottom: 1rem;
+  }
+
+  @media (min-width: 768px) {
+    :global(html[data-theme='classic']) .crumbs {
+      margin-bottom: 2rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .crumbs ol {
+    gap: 0;
+    font-size: 0.75rem;
+    color: #4b5563;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .crumbs ol {
+      font-size: 0.875rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .crumbs li + li::before {
+    margin: 0 0.25rem;
+    opacity: 1;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .crumbs li + li::before {
+      margin: 0 0.5rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .crumbs a:hover {
+    color: #2563eb;
+  }
+
+  :global(html[data-theme='classic']) .crumbs [aria-current='page'] {
+    color: #111827;
+    font-weight: 500;
+  }
+</style>

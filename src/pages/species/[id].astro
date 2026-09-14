@@ -1,267 +1,637 @@
 ---
-import type { ImageMetadata } from 'astro';
 import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
-import whaleData from '../../data/whales.json';
-
-// Import whale images dynamically using Vite's import.meta.glob
-const whaleImages = import.meta.glob<{ default: ImageMetadata }>('/src/assets/*.{webp,jpg,png}');
-
-// Define TypeScript interfaces for whale data
-interface WhaleSpecies {
-  id: string;
-  label: string;
-  common_name?: string;
-  type: string;
-  parent?: string;
-  description?: string;
-  iucn_status?: string;
-  size?: string;
-  weight?: string;
-  author?: string;
-}
-
-interface WhaleData {
-  nodes: WhaleSpecies[];
-  edges: Array<{ source: string; target: string }>;
-  summary: Record<string, any>;
-}
-
-// Function to find a node by ID in the whales.json data
-function findNodeById(id: string): WhaleSpecies | undefined {
-  return whaleData.nodes.find(node => node.id === id);
-}
-
-// Function to build the taxonomic hierarchy for breadcrumbs
-function buildTaxonomicHierarchy(speciesId: string): WhaleSpecies[] {
-  const hierarchy: WhaleSpecies[] = [];
-  let currentNode = findNodeById(speciesId);
-  
-  // Add the current species
-  if (currentNode) {
-    hierarchy.unshift(currentNode);
-    
-    // Traverse up the parent chain
-    while (currentNode?.parent) {
-      currentNode = findNodeById(currentNode.parent);
-      if (currentNode) {
-        hierarchy.unshift(currentNode);
-      }
-    }
-  }
-  
-  return hierarchy;
-}
+import SpeciesCard from '../../components/SpeciesCard.astro';
+import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import {
+  byId,
+  childrenOf,
+  imageFor,
+  iucnColor,
+  lineageOf,
+  nodes,
+  shortLabel,
+  type WhaleNode,
+} from '../../utils/whales';
 
 export async function getStaticPaths() {
-  const typedWhaleData = whaleData as WhaleData;
-  return typedWhaleData.nodes
-    .filter(item => item.type === 'species')
-    .map(species => ({
+  return nodes
+    .filter((item) => item.type === 'species')
+    .map((species) => ({
       params: { id: species.id },
-      props: { species }
+      props: { species },
     }));
 }
 
-const { species } = Astro.props as { species: WhaleSpecies };
+const { species } = Astro.props as { species: WhaleNode };
 
-// Get frame color based on IUCN status
-const getFrameColor = (status: string | undefined) => {
-  if (!status) return 'border-gray-400 shadow-gray-200';
-  switch (status.toLowerCase()) {
-    case 'critically endangered':
-      return 'border-red-600 shadow-red-200';
-    case 'endangered':
-      return 'border-orange-600 shadow-orange-200';
-    case 'vulnerable':
-      return 'border-yellow-600 shadow-yellow-200';
-    case 'near threatened':
-      return 'border-amber-600 shadow-amber-200';
-    case 'least concern':
-      return 'border-green-600 shadow-green-200';
-    case 'data deficient':
-      return 'border-gray-600 shadow-gray-200';
-    default:
-      return 'border-gray-400 shadow-gray-200';
-  }
+const image = imageFor(species.id);
+const statusColor = iucnColor(species.iucn_status);
+const status = species.iucn_status || 'Not Evaluated';
+const lineage = lineageOf(species.id);
+const genus = species.parent ? byId[species.parent] : undefined;
+
+// Everything else in the same genus, for the Atlas "Others in …" strip.
+const siblings = genus
+  ? childrenOf(genus.id).filter(
+      (n) => n.type === 'species' && n.id !== species.id
+    )
+  : [];
+
+const family = genus?.parent ? byId[genus.parent] : undefined;
+
+// Classic theme's border/shadow pair, kept verbatim so the toggle really does
+// restore the old page.
+const classicFrame: Record<string, string> = {
+  'critically endangered': 'border-red-600 shadow-red-200',
+  endangered: 'border-orange-600 shadow-orange-200',
+  vulnerable: 'border-yellow-600 shadow-yellow-200',
+  'near threatened': 'border-amber-600 shadow-amber-200',
+  'least concern': 'border-green-600 shadow-green-200',
+  'data deficient': 'border-gray-600 shadow-gray-200',
 };
-
-const frameColor = getFrameColor(species.iucn_status);
+const classicBadge: Record<string, string> = {
+  'critically endangered': 'bg-red-100 text-red-800',
+  endangered: 'bg-orange-100 text-orange-800',
+  vulnerable: 'bg-yellow-100 text-yellow-800',
+  'near threatened': 'bg-amber-100 text-amber-800',
+  'least concern': 'bg-green-100 text-green-800',
+};
+const statusKey = (species.iucn_status || '').toLowerCase();
+const frameClass = classicFrame[statusKey] ?? 'border-gray-400 shadow-gray-200';
+const badgeClass = classicBadge[statusKey] ?? 'bg-gray-100 text-gray-800';
 ---
 
-<Layout title={`${species.common_name || species.label} | Whale Encyclopedia`} 
-       description={`Learn about ${species.common_name || species.label}, ${species.description?.substring(0, 150) || 'a whale species'}`}>
-  
-  <div class="max-w-7xl mx-auto py-4 sm:py-6 md:py-8 lg:py-12">
-    <!-- Breadcrumb Navigation -->
-    <nav class="mb-4 sm:mb-6 md:mb-8 text-xs sm:text-sm px-4 sm:px-0">
-      <ol class="flex flex-wrap items-center text-gray-600">
-        <li><a href="/" class="hover:text-blue-600">Home</a></li>
-        
-        {/* Build the taxonomic hierarchy breadcrumbs */}
-        {(() => {
-          const hierarchy = buildTaxonomicHierarchy(species.id);
-          return hierarchy.map((node: WhaleSpecies, index: number, array: WhaleSpecies[]) => {
-            // Don't include the current species in the breadcrumb links
-            const isCurrentSpecies = index === array.length - 1;
-            return (
-              <li class="before:content-['›'] before:mx-1 sm:before:mx-2">
-                {isCurrentSpecies ? (
-                  <span class="text-gray-900 font-medium truncate max-w-[180px] sm:max-w-none">
-                    {node.common_name || node.label}
-                  </span>
-                ) : (
-                  <a href={`/${node.type}/${node.id}`} class="hover:text-blue-600">
-                    {node.type === 'suborder' || node.type === 'family' || node.type === 'genus' 
-                      ? node.label.split(' ')[0] // Just show the first part of the label (without parentheses)
-                      : node.label}
-                  </a>
-                )}
-              </li>
-            );
-          });
-        })()}
-      </ol>
-    </nav>
+<Layout
+  title={`${species.common_name || species.label} | Whale Encyclopedia`}
+  description={`Learn about ${species.common_name || species.label}, ${species.description?.substring(0, 150) || 'a whale species'}`}
+>
+  <article class="detail" style={`--status:${statusColor};`}>
+    <a href="/species" class="wback detail__back atlas-only">← All species</a>
 
-    <!-- Main Content -->
-    <div class="px-4 sm:px-6 md:px-8">
-      <!-- Flex container for desktop layout (side by side) -->
-      <div class="flex flex-col md:flex-row md:items-start md:gap-8 lg:gap-12">
-        <!-- Mobile: Image first / Desktop: Image on right -->
-        <div class="md:order-2 md:w-1/2 lg:w-7/12 xl:w-3/5 mb-8 md:mb-0">
-          <!-- Species Image with IUCN Status Frame -->
-          <div class={`block w-full max-w-none mx-auto md:mx-0 p-4 sm:p-6 lg:p-8 border-4 rounded-2xl shadow-2xl ${frameColor} bg-white transition-all duration-300 hover:shadow-3xl`}>
-            <div class="w-full bg-gray-100 rounded-lg overflow-hidden relative">
-              {/* Whale image with dynamic loading and fallback */}
-              <div class="w-full">
-                {(() => {
-                  // Check if we have an image for this whale species
-                  const imagePath = `/src/assets/${species.id}.webp`;
-                  
-                  // Try to find the image in our dynamically imported images
-                  if (whaleImages[imagePath]) {
-                    return (
-                      <Image 
-                        src={whaleImages[imagePath]()} 
-                        alt={`${species.common_name || species.label}`}
-                        width={1000}
-                        height={800}
-                        class="w-full object-contain max-h-[600px]"
-                        loading="eager"
-                      />
-                    );
-                  }
-                  
-                  // Try alternate extensions if webp not found
-                  const jpgPath = `/src/assets/${species.id}.jpg`;
-                  if (whaleImages[jpgPath]) {
-                    return (
-                      <Image 
-                        src={whaleImages[jpgPath]()} 
-                        alt={`${species.common_name || species.label}`}
-                        width={1000}
-                        height={800}
-                        class="w-full object-contain max-h-[600px]"
-                        loading="eager"
-                      />
-                    );
-                  }
-                  
-                  const pngPath = `/src/assets/${species.id}.png`;
-                  if (whaleImages[pngPath]) {
-                    return (
-                      <Image 
-                        src={whaleImages[pngPath]()} 
-                        alt={`${species.common_name || species.label}`}
-                        width={1000}
-                        height={800}
-                        class="w-full object-contain max-h-[600px]"
-                        loading="eager"
-                      />
-                    );
-                  }
-                  
-                  // Fallback to placeholder if no image exists
-                  return (
-                    <div class="text-center text-gray-500 w-full h-full flex flex-col items-center justify-center">
-                      <svg class="w-24 h-24 sm:w-32 sm:h-32 md:w-40 md:h-40 lg:w-48 lg:h-48 mx-auto mb-2 sm:mb-4 text-gray-400" fill="currentColor" viewBox="0 0 1024 1024">
-                        <path d="M944.7 435.7c11.5 13.5 16.4 31.2 13.6 48.6 0 0.2 0 0.4-0.1 0.5-10.8 65.6-41.5 125.2-88.7 172.3-25.2 25.2-54.2 45.7-85.7 61.1-31.5 15.3-65.5 25.4-100.7 29.6-6 12.4-16.4 22.5-29.4 27.9l-169 71.2c-6.1 2.1-12 1-14.2 0.1-4.6-1.9-8.2-5.5-10.1-10-12.7-30.1-13.1-62.3-3.6-91.1-69.4-11.2-133.1-45.2-181.4-97.4-54.5-58.8-84.5-135.4-84.5-215.7V328.5c0-4.3 0.6-8.5 1.6-12.5h-32.6c-52.8 0-95.7-42.9-95.7-95.7v-25.6c0-10.3 8.3-18.6 18.6-18.6h55.8c41 0 78.3 20.9 100.4 53.4 22.1-32.4 59.4-53.4 100.4-53.4h55.8c10.3 0 18.6 8.3 18.6 18.6v25.6c0 52.8-42.9 95.7-95.7 95.7h-29.5c0.3 1.1 0.6 2.2 0.8 3.3 10.4 55 58.7 95 114.9 95h494.2c17.7 0 34.6 7.8 46.2 21.4z"/>
-                        <path d="M916.4 459.8c1.6 1.9 2.9 4 3.8 6.2-133.9 23.7-240.8 126.5-268.9 260.7 0 0.2-0.1 0.4-0.1 0.7-1.4 6.3-5.8 11.6-11.8 14.1l-150.2 63.3c-8.5-42.4 13.7-86.5 55.1-104 9.5-4 13.9-14.9 9.9-24.3-4-9.5-14.9-13.9-24.3-9.9-23 9.7-41.8 25.3-55.3 44.3-65.8-7.8-126.5-38.7-171.9-87.6-48.2-51.9-74.7-119.5-74.7-190.4V328.5c0-3.4 1.3-6.5 3.6-8.8 2.4-2.4 5.5-3.7 8.9-3.7 6 0 11.2 4.3 12.3 10.3 13.7 72.6 77.4 125.2 151.4 125.2h494.2c6.9-0.1 13.5 3 18 8.3z" opacity="0.6"/>
-                      </svg>
-                      <p class="text-base sm:text-lg md:text-xl font-medium">Whale Image</p>
-                    </div>
-                  );
-                })()}
-              </div>
-            </div>
-            
-            {/* Image attribution if available - subtle version under the image */}
-            {species.author && (
-              <div class="mt-2 text-center">
-                <p class="text-xs text-gray-500 italic max-w-full overflow-hidden text-ellipsis whitespace-nowrap" title={species.author}>
-                  Photo: {species.author}
-                </p>
-              </div>
-            )}
-            
-            <!-- IUCN Status Badge -->
-            {species.iucn_status && (
-              <div class={`inline-block mt-4 px-3 py-1 sm:px-4 sm:py-2 rounded-full text-xs sm:text-sm font-bold ${
-                species.iucn_status.toLowerCase() === 'critically endangered' ? 'bg-red-100 text-red-800' :
-                species.iucn_status.toLowerCase() === 'endangered' ? 'bg-orange-100 text-orange-800' :
-                species.iucn_status.toLowerCase() === 'vulnerable' ? 'bg-yellow-100 text-yellow-800' :
-                species.iucn_status.toLowerCase() === 'near threatened' ? 'bg-amber-100 text-amber-800' :
-                species.iucn_status.toLowerCase() === 'least concern' ? 'bg-green-100 text-green-800' :
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {species.iucn_status}
-              </div>
-            )}
+    <Breadcrumbs trail={lineage} />
+
+    <div class="detail__grid">
+      <div class="detail__media">
+        <div class={`detail__frame ${frameClass}`}>
+          <div class="detail__imgwrap" data-detail-zoom={image ? '' : null}>
+            {
+              image ? (
+                <Image
+                  src={image}
+                  alt={species.common_name || species.label}
+                  class="detail__img"
+                  width={1000}
+                  height={800}
+                  loading="eager"
+                />
+              ) : (
+                <div class="detail__placeholder">
+                  <span class="icon-[tabler--photo]" />
+                  <p>No photo available</p>
+                </div>
+              )
+            }
+            {image && <span class="detail__zoom atlas-only">⤢ Full size</span>}
+            <span class="detail__status atlas-only">{status}</span>
           </div>
+
+          {
+            species.author && (
+              <p class="detail__credit" title={species.author}>
+                Photo: {species.author}
+              </p>
+            )
+          }
+
+          <div class={`classic-only detail__badge ${badgeClass}`}>{status}</div>
         </div>
-        
-        <!-- Mobile: Info below / Desktop: Info on left -->
-        <div class="md:order-1 md:w-1/2 lg:w-5/12 xl:w-2/5 md:pr-4">
-          <!-- Species Names -->
-          <div class="mb-6 text-center md:text-left">
-            <h1 class="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2 break-words">
-              {species.common_name || 'Unknown Common Name'}
-            </h1>
-            <p class="text-xl sm:text-2xl text-gray-600 italic break-words">
-              {species.label}
-            </p>
+      </div>
+
+      <div class="detail__info">
+        <h1 class="t-display detail__name">
+          {species.common_name || 'Unknown Common Name'}
+        </h1>
+        <p class="t-sci detail__sci">{species.label}</p>
+
+        <div class="detail__about">
+          <h2 class="classic-only detail__about-title">About This Species</h2>
+
+          <div class="detail__stats">
+            <div>
+              <span>Length</span><strong>{species.size || '—'}</strong>
+            </div>
+            <div>
+              <span>Weight</span><strong>{species.weight || '—'}</strong>
+            </div>
           </div>
-          
-          <!-- Description -->
-          <div class="bg-blue-50 rounded-lg p-4 sm:p-6 border border-blue-200 mb-6 shadow-md">
-            <h2 class="text-xl sm:text-2xl font-bold mb-3 sm:mb-4 text-blue-900 text-center md:text-left">About This Species</h2>
-            <p class="text-base sm:text-lg leading-relaxed text-gray-700">
-              {species.description || 'No description available for this species.'}
-            </p>
-            
-            <!-- Species Details -->
-            {(species.size || species.weight) && (
-              <div class="mt-6 grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-blue-200 pt-4">
-                {species.size && (
-                  <div>
-                    <h3 class="text-base sm:text-lg font-semibold text-blue-800">Size</h3>
-                    <p class="text-sm sm:text-base text-gray-700">{species.size}</p>
-                  </div>
-                )}
-                {species.weight && (
-                  <div>
-                    <h3 class="text-base sm:text-lg font-semibold text-blue-800">Weight</h3>
-                    <p class="text-sm sm:text-base text-gray-700">{species.weight}</p>
-                  </div>
-                )}
-              </div>
-            )}
-          </div>
+
+          <p class="detail__desc">
+            {
+              species.description ||
+                'No description available for this species.'
+            }
+          </p>
         </div>
       </div>
     </div>
 
-    <!-- End of main content -->
-  </div>
+    {
+      siblings.length > 0 && (
+        <section class="detail__siblings atlas-only">
+          <h2 class="t-display detail__siblings-title">
+            Others in {genus!.label}
+          </h2>
+          <div class="detail__siblings-grid">
+            {siblings.map((s) => (
+              <SpeciesCard
+                species={s}
+                kicker={family ? shortLabel(family.label) : undefined}
+              />
+            ))}
+          </div>
+        </section>
+      )
+    }
+  </article>
+
+  {
+    image && (
+      <div class="detail-lightbox" data-lightbox hidden>
+        <button class="wclose detail-lightbox__close" aria-label="Close">
+          ×
+        </button>
+        <figure>
+          <Image
+            src={image}
+            alt={species.common_name || species.label}
+            width={1600}
+            height={1200}
+            loading="lazy"
+          />
+          <figcaption>
+            <div class="detail-lightbox__common">
+              {species.common_name || species.label}
+            </div>
+            <div class="detail-lightbox__sci">{species.label}</div>
+          </figcaption>
+        </figure>
+      </div>
+    )
+  }
 </Layout>
+
+<style>
+  .detail {
+    padding-block: 8px 0;
+  }
+
+  .detail__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    height: 36px;
+    padding: 0 16px;
+    border-radius: 999px;
+    text-decoration: none;
+    margin-bottom: 18px;
+  }
+
+  .detail__grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 34px;
+    align-items: flex-start;
+  }
+
+  .detail__media {
+    flex: 1 1 380px;
+    min-width: 280px;
+  }
+
+  .detail__info {
+    flex: 1 1 360px;
+    min-width: 280px;
+  }
+
+  .detail__imgwrap {
+    position: relative;
+    border-radius: 22px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    background: rgba(0, 0, 0, 0.15);
+    cursor: zoom-in;
+  }
+
+  .detail__img {
+    width: 100%;
+    display: block;
+    object-fit: cover;
+    max-height: 480px;
+  }
+
+  .detail__placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 64px 16px;
+    color: var(--faint);
+  }
+
+  .detail__placeholder span {
+    width: 3rem;
+    height: 3rem;
+  }
+
+  .detail__zoom {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 7px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+  }
+
+  .detail__status {
+    position: absolute;
+    bottom: 14px;
+    left: 14px;
+    padding: 6px 13px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    background: var(--status);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  }
+
+  .detail__credit {
+    margin: 8px 0 0;
+    text-align: center;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--faint);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .detail__name {
+    font-size: clamp(34px, 4.8vw, 54px);
+    line-height: 1;
+    letter-spacing: -0.8px;
+    margin: 0 0 8px;
+  }
+
+  .detail__sci {
+    font-size: clamp(17px, 2.4vw, 21px);
+    margin: 0 0 24px;
+  }
+
+  .detail__stats {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .detail__stats > div {
+    flex: 1;
+    min-width: 120px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .detail__stats span {
+    display: block;
+    font-size: 11px;
+    color: var(--faint);
+    margin-bottom: 4px;
+  }
+
+  .detail__stats strong {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  .detail__desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--ink);
+    opacity: 0.88;
+    margin: 0;
+  }
+
+  .detail__siblings {
+    margin-top: 48px;
+  }
+
+  .detail__siblings-title {
+    font-size: clamp(24px, 3vw, 32px);
+    letter-spacing: -0.3px;
+    margin: 0 0 20px;
+  }
+
+  .detail__siblings-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 16px;
+  }
+
+  /* --- Classic ----------------------------------------------------------- */
+
+  /* Classic put the photo on the right and the prose on the left. */
+  :global(html[data-theme='classic']) .detail__grid {
+    gap: 2rem;
+  }
+
+  :global(html[data-theme='classic']) .detail__media {
+    order: 2;
+  }
+
+  :global(html[data-theme='classic']) .detail__info {
+    order: 1;
+  }
+
+  :global(html[data-theme='classic']) .detail__frame {
+    padding: 1rem;
+    border-width: 4px;
+    border-style: solid;
+    border-radius: 1rem;
+    background: #ffffff;
+    box-shadow:
+      0 25px 50px -12px rgba(0, 0, 0, 0.25),
+      0 0 0 1px rgba(0, 0, 0, 0.02);
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__frame {
+      padding: 1.5rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__imgwrap {
+    border: none;
+    border-radius: 0.5rem;
+    box-shadow: none;
+    background: #f3f4f6;
+    cursor: default;
+  }
+
+  :global(html[data-theme='classic']) .detail__img {
+    object-fit: contain;
+    max-height: 600px;
+  }
+
+  :global(html[data-theme='classic']) .detail__badge {
+    display: inline-block;
+    margin-top: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__badge {
+      padding: 0.5rem 1rem;
+      font-size: 0.875rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__name {
+    font-size: 1.875rem;
+    letter-spacing: normal;
+    line-height: 1.15;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    :global(html[data-theme='classic']) .detail__name {
+      font-size: 2.25rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__sci {
+    font-size: 1.25rem;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__sci {
+      font-size: 1.5rem;
+    }
+  }
+
+  /* The blue "About this species" card, with size/weight moved back below the
+     prose and under a rule, the way the original page had it. */
+  :global(html[data-theme='classic']) .detail__about {
+    display: flex;
+    flex-direction: column;
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    box-shadow:
+      0 4px 6px -1px rgba(0, 0, 0, 0.1),
+      0 2px 4px -2px rgba(0, 0, 0, 0.1);
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__about {
+      padding: 1.5rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__about-title {
+    order: 1;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1e3a8a;
+    margin: 0 0 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__about-title {
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__desc {
+    order: 2;
+    font-size: 1rem;
+    line-height: 1.625;
+    color: #374151;
+    opacity: 1;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__desc {
+      font-size: 1.125rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__stats {
+    order: 3;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+    margin: 1.5rem 0 0;
+    border-top: 1px solid #bfdbfe;
+    padding-top: 1rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__stats {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__stats > div {
+    padding: 0;
+    border: none;
+    background: none;
+    min-width: 0;
+  }
+
+  :global(html[data-theme='classic']) .detail__stats span {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #1e40af;
+    margin-bottom: 0.125rem;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__stats span {
+      font-size: 1.125rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .detail__stats strong {
+    font-size: 0.875rem;
+    font-weight: 400;
+    color: #374151;
+  }
+
+  @media (min-width: 640px) {
+    :global(html[data-theme='classic']) .detail__stats strong {
+      font-size: 1rem;
+    }
+  }
+
+  /* --- lightbox ---------------------------------------------------------- */
+
+  .detail-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(3, 11, 19, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    cursor: zoom-out;
+  }
+
+  .detail-lightbox[hidden] {
+    display: none;
+  }
+
+  .detail-lightbox__close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .detail-lightbox figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    max-width: 96vw;
+    max-height: 92vh;
+  }
+
+  .detail-lightbox :global(img) {
+    max-width: 96vw;
+    max-height: 78vh;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.85);
+  }
+
+  .detail-lightbox figcaption {
+    text-align: center;
+  }
+
+  .detail-lightbox__common {
+    font-family: 'Spectral', ui-serif, Georgia, serif;
+    font-size: 21px;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .detail-lightbox__sci {
+    font-family: 'Spectral', ui-serif, Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 3px;
+  }
+</style>
+
+<script>
+  const trigger = document.querySelector('[data-detail-zoom]');
+  const lightbox = document.querySelector(
+    '[data-lightbox]'
+  ) as HTMLElement | null;
+
+  if (trigger && lightbox) {
+    trigger.addEventListener('click', () => {
+      // Classic renders the photo in a static frame with no zoom affordance.
+      if (document.documentElement.dataset.theme === 'classic') return;
+      lightbox.hidden = false;
+    });
+    lightbox.addEventListener('click', () => (lightbox.hidden = true));
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') lightbox.hidden = true;
+    });
+  }
+</script>

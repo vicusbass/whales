@@ -1,5 +1,6 @@
 ---
 import { Image } from 'astro:assets';
+import { imageFor, iucnColor } from '../utils/whales';
 
 export interface Props {
   species: {
@@ -8,73 +9,238 @@ export interface Props {
     common_name?: string;
     iucn_status?: string;
   };
+  /** Small line above the name in the Atlas theme — usually the family. */
+  kicker?: string;
 }
 
-const { species } = Astro.props;
+const { species, kicker } = Astro.props;
 
-const images = import.meta.glob<{ default: any }>('/src/assets/*.{jpeg,jpg,png,gif,webp}');
+const image = imageFor(species.id);
+const statusColor = iucnColor(species.iucn_status);
+const status = species.iucn_status || 'Data Deficient';
 
-function getImagePath(speciesId: string): (() => Promise<{ default: any }>) | null {
-  const extensions = ['webp', 'jpg', 'jpeg', 'png', 'gif'];
-  for (const ext of extensions) {
-    const path = `/src/assets/${speciesId}.${ext}`;
-    if (path in images) {
-      return images[path];
-    }
-  }
-  return null;
-}
-
-function getStatusColor(status: string | undefined): { bg: string; border: string } {
-  if (!status) return { bg: 'bg-gray-300', border: 'border-gray-300' };
-  switch (status.toLowerCase()) {
-    case 'least concern': return { bg: 'bg-green-500', border: 'border-green-500' };
-    case 'near threatened': return { bg: 'bg-yellow-500', border: 'border-yellow-500' };
-    case 'vulnerable': return { bg: 'bg-orange-500', border: 'border-orange-500' };
-    case 'endangered': return { bg: 'bg-red-500', border: 'border-red-500' };
-    case 'critically endangered': return { bg: 'bg-red-700', border: 'border-red-700' };
-    case 'extinct in the wild': return { bg: 'bg-purple-700', border: 'border-purple-700' };
-    case 'extinct': return { bg: 'bg-black', border: 'border-black' };
-    case 'data deficient': return { bg: 'bg-gray-500', border: 'border-gray-500' };
-    default: return { bg: 'bg-gray-300', border: 'border-gray-300' };
-  }
-}
-
-const imagePath = getImagePath(species.id);
-const imageModule = imagePath ? await imagePath() : null;
-const statusColor = getStatusColor(species.iucn_status);
+/**
+ * One markup, two looks. The Classic card is a white tile with an offset
+ * colour block and a status pill; the Atlas card is a surface tile with a
+ * full-bleed photo and a status dot. Everything that differs is a CSS
+ * decision so the photo is downloaded once, not once per theme.
+ */
 ---
 
-<div class="relative w-full h-full">
-  <span class={`absolute top-0 left-0 w-full h-full mt-1 ml-1 ${statusColor.bg} rounded-lg`}></span>
-  <a href={`/species/${species.id}`} class={`relative flex flex-col h-full p-3 bg-white border-2 ${statusColor.border} rounded-lg hover:shadow-lg transition-shadow`}>
-    <div class="relative w-full h-48 bg-gray-200 rounded mb-3 flex-shrink-0 overflow-hidden">
-      {imageModule ? (
-        <Image 
-          src={imageModule.default} 
-          alt={species.common_name || species.label} 
-          class="object-contain w-full h-full rounded"
-          width={400}
-          height={300}
-        />
-      ) : (
-        <div class="flex items-center justify-center h-full bg-gray-100 rounded">
-          <span class="text-gray-400 icon-[tabler--photo] w-12 h-12"></span>
-        </div>
-      )}
+<article class="scard" style={`--status:${statusColor};`}>
+  <span class="scard__offset" aria-hidden="true"></span>
+  <a class="scard__link wgcard" href={`/species/${species.id}`}>
+    <div class="scard__media">
+      {
+        image ? (
+          <Image
+            src={image}
+            alt={species.common_name || species.label}
+            class="scard__img wgimg"
+            width={400}
+            height={300}
+          />
+        ) : (
+          <div class="scard__placeholder">
+            <span class="icon-[tabler--photo]" />
+          </div>
+        )
+      }
+      <span class="scard__dot" title={status} aria-hidden="true"></span>
     </div>
-    
-    <div class="flex-grow flex flex-col justify-between">
-      <div>
-        <h3 class="text-lg font-bold text-gray-800 mb-1 line-clamp-2">{species.common_name || "Unknown"}</h3>
-        <p class="text-gray-600 italic text-sm mb-2 line-clamp-1">{species.label}</p>
-      </div>
-      
-      {species.iucn_status && (
-        <span class="inline-block px-2 py-1 text-xs rounded bg-gray-100 text-gray-700 mt-auto self-start">
-          {species.iucn_status}
-        </span>
-      )}
+
+    <div class="scard__body">
+      {kicker && <div class="scard__kicker">{kicker}</div>}
+      <h3 class="scard__common">{species.common_name || species.label}</h3>
+      <p class="scard__sci t-sci">{species.label}</p>
+      <span class="scard__status">{status}</span>
     </div>
   </a>
-</div>
+</article>
+
+<style>
+  .scard {
+    position: relative;
+    width: 100%;
+    height: 100%;
+  }
+
+  .scard__link {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    text-decoration: none;
+    color: var(--ink);
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .scard__media {
+    position: relative;
+    overflow: hidden;
+    flex: none;
+    aspect-ratio: 4 / 3;
+    background: rgba(0, 0, 0, 0.16);
+  }
+
+  .scard__img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+  }
+
+  .scard__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--faint);
+  }
+
+  .scard__placeholder span {
+    width: 2.5rem;
+    height: 2.5rem;
+  }
+
+  .scard__dot {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 13px;
+    height: 13px;
+    border-radius: 50%;
+    background: var(--status);
+    box-shadow:
+      0 0 9px var(--status),
+      0 0 0 3px rgba(0, 0, 0, 0.22);
+  }
+
+  .scard__body {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    padding: 13px 15px 16px;
+  }
+
+  .scard__kicker {
+    font-size: 11px;
+    color: var(--faint);
+    letter-spacing: 0.3px;
+    margin-bottom: 5px;
+  }
+
+  .scard__common {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.2;
+    margin: 0;
+  }
+
+  .scard__sci {
+    font-size: 13px;
+    margin: 3px 0 0;
+  }
+
+  /* Atlas shows status as the dot overlay; Classic shows it as a pill. */
+  .scard__offset,
+  .scard__status {
+    display: none;
+  }
+
+  /* --- Classic ----------------------------------------------------------- */
+
+  :global(html[data-theme='classic']) .scard__offset {
+    display: block;
+    position: absolute;
+    inset: 0;
+    margin: 0.25rem 0 0 0.25rem;
+    background: var(--status);
+    border-radius: 0.5rem;
+  }
+
+  :global(html[data-theme='classic']) .scard__link {
+    padding: 0.75rem;
+    background: #ffffff;
+    border: 2px solid var(--status);
+    border-radius: 0.5rem;
+    color: #1f2937;
+    transition: box-shadow 0.15s;
+  }
+
+  :global(html[data-theme='classic']) .scard__link:hover {
+    transform: none;
+    box-shadow:
+      0 10px 15px -3px rgba(0, 0, 0, 0.1),
+      0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  }
+
+  :global(html[data-theme='classic']) .scard__media {
+    aspect-ratio: auto;
+    height: 12rem;
+    background: #e5e7eb;
+    border-radius: 0.25rem;
+    margin-bottom: 0.75rem;
+  }
+
+  :global(html[data-theme='classic']) .scard__img {
+    object-fit: contain;
+    border-radius: 0.25rem;
+  }
+
+  :global(html[data-theme='classic']) .scard__link:hover .scard__img {
+    transform: none;
+  }
+
+  :global(html[data-theme='classic']) .scard__placeholder {
+    background: #f3f4f6;
+    border-radius: 0.25rem;
+    color: #9ca3af;
+  }
+
+  :global(html[data-theme='classic']) .scard__dot,
+  :global(html[data-theme='classic']) .scard__kicker {
+    display: none;
+  }
+
+  :global(html[data-theme='classic']) .scard__body {
+    padding: 0;
+    justify-content: space-between;
+  }
+
+  :global(html[data-theme='classic']) .scard__common {
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1f2937;
+    margin-bottom: 0.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  :global(html[data-theme='classic']) .scard__sci {
+    color: #4b5563;
+    font-style: italic;
+    font-size: 0.875rem;
+    margin: 0 0 0.5rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  :global(html[data-theme='classic']) .scard__status {
+    display: inline-block;
+    align-self: flex-start;
+    margin-top: auto;
+    padding: 0.25rem 0.5rem;
+    font-size: 0.75rem;
+    border-radius: 0.25rem;
+    background: #f3f4f6;
+    color: #374151;
+  }
+</style>
