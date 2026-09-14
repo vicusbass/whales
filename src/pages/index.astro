@@ -1,41 +1,274 @@
 ---
 import Layout from '../layouts/Layout.astro';
 import WhaleTreeView from '../components/WhaleTreeView.astro';
+import WhaleGraph from '../components/WhaleGraph.astro';
+import { counts, iucnBreakdown } from '../utils/whales';
+
+// "forty-four" in the hero is spelled out in the design; keep the numeral and
+// the word in step if the dataset ever changes.
+const SPELLED: Record<number, string> = {
+  42: 'forty-two',
+  43: 'forty-three',
+  44: 'forty-four',
+  45: 'forty-five',
+  46: 'forty-six',
+};
+const spelledSpecies = SPELLED[counts.species] ?? String(counts.species);
+
+const stats = [
+  { value: counts.species, label: 'living species' },
+  { value: counts.genera, label: 'genera' },
+  { value: counts.families, label: 'families' },
+  { value: counts.suborders, label: 'suborders — baleen & toothed' },
+];
 ---
 
-<Layout>
-  <section class="mb-8">
-    <h1 class="text-xl md:text-2xl font-bold mb-4 border-b border-blue-300 pb-2">Whale Taxonomy Tree</h1>
-    <p class="mb-6 text-gray-600 md:text-lg">
-      Explore the taxonomic classification of whales from order down to genus level. 
-      Click the + sign to expand each category and discover the diversity of whale families and genera, you can click on any category to see the whales from it.
-    </p>
-    <WhaleTreeView />
-  </section>
+<Layout
+  title="Whale Encyclopedia"
+  description="An atlas of every living whale species, mapped across the branches of life."
+>
+  {/* ---------- Atlas ---------- */}
+  <div class="atlas-only">
+    <section class="hero">
+      <div class="kicker">Order Cetacea</div>
+      <h1 class="t-display hero__title">
+        An atlas of the<br /><em>{spelledSpecies}</em> whales
+      </h1>
+      <p class="hero__lede">
+        From the colossal blue whale to the elusive beaked whales of the deep,
+        every living species mapped across the branches of life.
+      </p>
+    </section>
 
-  <section class="mb-8">
-    <h2 class="text-xl md:text-2xl font-bold mb-4 border-b border-blue-300 pb-2">Conservation Status</h2>
-    <p class="mb-4">
-      Many whale species are endangered or threatened due to historical whaling, 
-      habitat loss, climate change, and other human activities.
-    </p>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-red-100 p-4 rounded-lg border-l-4 border-red-600">
-        <h3 class="font-bold text-red-800">Critically Endangered</h3>
-        <p class="text-sm mt-1">Facing an extremely high risk of extinction in the wild</p>
+    <WhaleGraph />
+
+    <section class="stats">
+      {
+        stats.map((s) => (
+          <div>
+            <div class="t-display stats__value">{s.value}</div>
+            <div class="stats__label">{s.label}</div>
+          </div>
+        ))
+      }
+    </section>
+
+    <section class="conservation">
+      <h2 class="t-display conservation__title">Conservation status</h2>
+      <p class="conservation__lede">
+        Centuries of whaling, entanglement, ship strikes and a warming ocean
+        have left many species at risk. Colour marks each species' standing on
+        the IUCN Red List.
+      </p>
+
+      <div class="conservation__bar">
+        {
+          iucnBreakdown.map((s) => (
+            <div
+              title={`${s.status} · ${s.count}`}
+              style={`flex:${s.count};background:${s.color};`}
+            />
+          ))
+        }
       </div>
-      <div class="bg-orange-100 p-4 rounded-lg border-l-4 border-orange-600">
-        <h3 class="font-bold text-orange-800">Endangered</h3>
-        <p class="text-sm mt-1">Facing a very high risk of extinction in the wild</p>
+
+      <div class="conservation__legend">
+        {
+          iucnBreakdown.map((s) => (
+            <div>
+              <span style={`background:${s.color};`} />
+              {s.status} <b>{s.count}</b>
+            </div>
+          ))
+        }
       </div>
-      <div class="bg-yellow-100 p-4 rounded-lg border-l-4 border-yellow-600">
-        <h3 class="font-bold text-yellow-800">Vulnerable</h3>
-        <p class="text-sm mt-1">Facing a high risk of extinction in the wild</p>
+
+      <a href="/species" class="wbtn conservation__cta"
+        >Browse all {counts.species} species</a
+      >
+    </section>
+  </div>
+
+  {/* ---------- Classic ---------- */}
+  <div class="classic-only">
+    <section class="mb-8">
+      <h1
+        class="mb-4 border-b border-blue-300 pb-2 text-xl font-bold md:text-2xl"
+      >
+        Whale Taxonomy Tree
+      </h1>
+      <p class="mb-6 text-gray-600 md:text-lg">
+        Explore the taxonomic classification of whales from order down to genus
+        level. Click the + sign to expand each category and discover the
+        diversity of whale families and genera, you can click on any category to
+        see the whales from it.
+      </p>
+      <WhaleTreeView />
+    </section>
+
+    <section class="mb-8">
+      <h2
+        class="mb-4 border-b border-blue-300 pb-2 text-xl font-bold md:text-2xl"
+      >
+        Conservation Status
+      </h2>
+      <p class="mb-4">
+        Many whale species are endangered or threatened due to historical
+        whaling, habitat loss, climate change, and other human activities.
+      </p>
+      <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div class="rounded-lg border-l-4 border-red-600 bg-red-100 p-4">
+          <h3 class="font-bold text-red-800">Critically Endangered</h3>
+          <p class="mt-1 text-sm">
+            Facing an extremely high risk of extinction in the wild
+          </p>
+        </div>
+        <div class="rounded-lg border-l-4 border-orange-600 bg-orange-100 p-4">
+          <h3 class="font-bold text-orange-800">Endangered</h3>
+          <p class="mt-1 text-sm">
+            Facing a very high risk of extinction in the wild
+          </p>
+        </div>
+        <div class="rounded-lg border-l-4 border-yellow-600 bg-yellow-100 p-4">
+          <h3 class="font-bold text-yellow-800">Vulnerable</h3>
+          <p class="mt-1 text-sm">
+            Facing a high risk of extinction in the wild
+          </p>
+        </div>
+        <div class="rounded-lg border-l-4 border-green-600 bg-green-100 p-4">
+          <h3 class="font-bold text-green-800">Least Concern</h3>
+          <p class="mt-1 text-sm">
+            Evaluated as not being at risk of extinction in the near future
+          </p>
+        </div>
       </div>
-      <div class="bg-green-100 p-4 rounded-lg border-l-4 border-green-600">
-        <h3 class="font-bold text-green-800">Least Concern</h3>
-        <p class="text-sm mt-1">Evaluated as not being at risk of extinction in the near future</p>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </Layout>
+
+<style>
+  .hero {
+    max-width: 680px;
+    margin: 30px 0 40px;
+  }
+
+  .kicker {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .hero__title {
+    font-size: clamp(40px, 6.4vw, 72px);
+    line-height: 1;
+    letter-spacing: -1px;
+    margin: 0 0 22px;
+  }
+
+  .hero__title em {
+    font-style: italic;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  .hero__lede {
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0;
+  }
+
+  .stats {
+    margin-top: 56px;
+    display: flex;
+    gap: 16px 40px;
+    flex-wrap: wrap;
+    padding: 28px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .stats__value {
+    font-size: 40px;
+    line-height: 1;
+  }
+
+  .stats__label {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .conservation {
+    margin-top: 56px;
+  }
+
+  .conservation__title {
+    font-size: clamp(28px, 3.4vw, 38px);
+    letter-spacing: -0.3px;
+    margin: 0 0 12px;
+  }
+
+  .conservation__lede {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    max-width: 560px;
+    margin: 0 0 26px;
+  }
+
+  .conservation__bar {
+    display: flex;
+    gap: 3px;
+    height: 10px;
+    margin-bottom: 18px;
+  }
+
+  .conservation__bar > div {
+    border-radius: 999px;
+  }
+
+  .conservation__legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 24px;
+  }
+
+  .conservation__legend > div {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--muted);
+  }
+
+  .conservation__legend span {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .conservation__legend b {
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .conservation__cta {
+    display: inline-flex;
+    align-items: center;
+    margin-top: 30px;
+    height: 44px;
+    padding: 0 24px;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-size: 13.5px;
+    font-weight: 600;
+    text-decoration: none;
+  }
+</style>

@@ -1,0 +1,15 @@
+# Prettier already skips anything in .gitignore (dist/, .astro/, node_modules/).
+# These are tracked or untracked paths it would otherwise rewrite.
+#
+# NOTE: prettier-plugin-tailwindcss is pinned to ^0.7.4 (i.e. < 0.8) on purpose.
+# In 0.8.1 its wrapper around prettier-plugin-astro's `astro` parser loses the
+# parser's `astFormat`, so Prettier falls back to the built-in HTML printer and
+# silently rewrites every .astro file to "<object></object>" — reporting success
+# while doing it. Do not widen that range without re-testing `npm run format`
+# on a throwaway .astro file first.
+
+# Remember plugin session state — machine-written, not source.
+.remember/
+
+# Lockfile is npm's to format.
+package-lock.json

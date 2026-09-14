@@ -1,0 +1,1568 @@
+---
+import { graphData, speciesThumbnails } from '../utils/whales';
+
+/**
+ * Radial taxonomy graph, ported from the Whale Atlas design.
+ *
+ * The nodes, links, panels and lightbox are all built in the browser, so the
+ * taxonomy travels as JSON and the species photos travel as pre-optimised URLs
+ * produced by Astro's image pipeline at build time.
+ *
+ * Unlike the original design, selecting a species does not swap an in-page
+ * view: the panel's primary action navigates to the real /species/[id] page,
+ * so every species stays a crawlable URL.
+ */
+const thumbs = await speciesThumbnails(560);
+const payload = JSON.stringify(graphData(thumbs)).replace(/</g, '\\u003c');
+---
+
+<script
+  is:inline
+  type="application/json"
+  data-whale-graph-data
+  set:html={payload}
+/>
+
+<section class="wstage" data-stage aria-label="Whale taxonomy graph">
+  <div class="wstage__vignette" aria-hidden="true"></div>
+
+  <div class="wglass wstage__crumbs" data-crumbs></div>
+
+  <div class="wglass wstage__zoom">
+    <button class="wctrl" data-zoom-in aria-label="Zoom in">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"><path d="M7 1.5v11M1.5 7h11"></path></svg
+      >
+    </button>
+    <div class="wstage__zoom-sep"></div>
+    <button class="wctrl" data-zoom-out aria-label="Zoom out">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"><path d="M1.5 7h11"></path></svg
+      >
+    </button>
+    <div class="wstage__zoom-sep"></div>
+    <button class="wctrl" data-reset aria-label="Reset view">
+      <svg
+        width="14"
+        height="14"
+        viewBox="0 0 14 14"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.6"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        ><path d="M2.2 7a4.8 4.8 0 1 0 1.4-3.4"></path><path d="M2 1.8v2.4h2.4"
+        ></path></svg
+      >
+    </button>
+  </div>
+
+  <div class="whint" aria-hidden="true">
+    <span>Drag to explore</span>
+    <span>Tap <b>+</b> to branch out</span>
+    <span>Tap a node to list its whales</span>
+  </div>
+
+  <div class="wviewport" data-viewport></div>
+</section>
+
+<!-- Species detail panel -->
+<aside
+  class="wpanel wpanel--species"
+  data-species-panel
+  hidden
+  aria-label="Species detail"
+>
+  <div class="wpanel__media">
+    <img data-sp-img alt="" loading="lazy" />
+    <span class="wpanel__zoom" data-sp-zoom>⤢ Full size</span>
+    <button class="wclose wpanel__close" data-sp-close aria-label="Close"
+      >×</button
+    >
+    <span class="wpanel__status" data-sp-status></span>
+  </div>
+  <div class="wpanel__body">
+    <div class="wpanel__lineage" data-sp-lineage></div>
+    <h3 class="wpanel__title" data-sp-common></h3>
+    <p class="t-sci wpanel__sci" data-sp-sci></p>
+    <div class="wpanel__stats">
+      <div><span>Length</span><strong data-sp-size></strong></div>
+      <div><span>Weight</span><strong data-sp-weight></strong></div>
+    </div>
+    <p class="wpanel__desc" data-sp-desc></p>
+    <a class="wbtn wpanel__cta" data-sp-link href="/">View full profile</a>
+    <button class="wback wpanel__secondary" data-sp-siblings></button>
+  </div>
+</aside>
+
+<!-- Taxon species list panel -->
+<aside
+  class="wpanel wpanel--list"
+  data-list-panel
+  hidden
+  aria-label="Species in taxon"
+>
+  <div class="wpanel__head">
+    <div>
+      <div class="wpanel__kicker" data-lp-kicker></div>
+      <h3 class="wpanel__title" data-lp-title></h3>
+      <div class="wpanel__count" data-lp-count></div>
+    </div>
+    <button class="wclose wpanel__head-close" data-lp-close aria-label="Close"
+      >×</button
+    >
+  </div>
+  <div class="wpanel__rows" data-lp-rows></div>
+  <a class="wback wpanel__browse" data-lp-link href="/">Open full page</a>
+</aside>
+
+<!-- Lightbox -->
+<div class="wlightbox" data-lightbox hidden>
+  <button class="wclose wlightbox__close" data-lb-close aria-label="Close"
+    >×</button
+  >
+  <figure>
+    <img data-lb-img alt="" />
+    <figcaption>
+      <div class="wlightbox__common" data-lb-common></div>
+      <div class="wlightbox__sci" data-lb-sci></div>
+    </figcaption>
+  </figure>
+</div>
+
+<style>
+  .wstage {
+    position: relative;
+    height: clamp(440px, 68vh, 740px);
+    border-radius: 28px;
+    background: var(--stage-bg);
+    border: 1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .wstage__vignette {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      120% 90% at 50% 50%,
+      transparent 60%,
+      rgba(0, 0, 0, 0.14)
+    );
+    pointer-events: none;
+    z-index: 3;
+  }
+
+  .wstage__crumbs {
+    position: absolute;
+    top: 16px;
+    left: 16px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    max-width: calc(100% - 90px);
+    overflow-x: auto;
+    padding: 0 14px;
+    height: 36px;
+    border-radius: 999px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--muted);
+    scrollbar-width: none;
+  }
+
+  .wstage__crumbs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .wstage__crumbs :global(.wcrumb) {
+    white-space: nowrap;
+    background: none;
+    border: none;
+    font: inherit;
+    color: inherit;
+    padding: 0;
+  }
+
+  .wstage__crumbs :global(.wcrumb-sep) {
+    color: var(--faint);
+    font-size: 11px;
+  }
+
+  .wstage__zoom {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    z-index: 4;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .wstage__zoom button {
+    width: 36px;
+    height: 36px;
+    border: none;
+    background: transparent;
+    color: var(--ink);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wstage__zoom-sep {
+    height: 1px;
+    background: var(--border);
+    margin: 0 8px;
+  }
+
+  .whint {
+    position: absolute;
+    left: 16px;
+    bottom: 14px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 14px;
+    font-size: 12px;
+    color: var(--faint);
+    pointer-events: none;
+    max-width: calc(100% - 32px);
+  }
+
+  .whint span {
+    white-space: nowrap;
+  }
+
+  .whint b {
+    color: var(--muted);
+    font-weight: 600;
+  }
+
+  /* --- panels ----------------------------------------------------------- */
+
+  .wpanel {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 60;
+    width: min(400px, calc(100vw - 32px));
+    max-height: 84vh;
+    overflow-y: auto;
+    border-radius: 20px;
+    background: var(--panel-bg);
+    border: 1px solid var(--border-2);
+    box-shadow: 0 30px 80px -24px rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+  }
+
+  .wpanel--list {
+    width: min(420px, calc(100vw - 32px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .wpanel[hidden] {
+    display: none;
+  }
+
+  .wpanel__media {
+    position: relative;
+  }
+
+  .wpanel__media img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    display: block;
+    border-radius: 20px 20px 0 0;
+    background: rgba(0, 0, 0, 0.15);
+    cursor: zoom-in;
+  }
+
+  .wpanel__zoom {
+    position: absolute;
+    top: 12px;
+    left: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(6px);
+    cursor: zoom-in;
+  }
+
+  .wpanel__close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.45);
+    color: #fff;
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(6px);
+  }
+
+  .wpanel__status {
+    position: absolute;
+    bottom: 12px;
+    left: 14px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.3px;
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  }
+
+  .wpanel__body {
+    padding: 20px 22px 24px;
+  }
+
+  .wpanel__lineage {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.4px;
+    color: var(--faint);
+    margin-bottom: 6px;
+  }
+
+  .wpanel__title {
+    font-family: var(--font-display);
+    font-weight: 500;
+    font-size: 26px;
+    line-height: 1.1;
+    margin: 0 0 4px;
+  }
+
+  .wpanel__sci {
+    font-size: 15px;
+    margin: 0 0 18px;
+  }
+
+  .wpanel__stats {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 18px;
+  }
+
+  .wpanel__stats > div {
+    flex: 1;
+    padding: 11px 14px;
+    border-radius: 12px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .wpanel__stats span {
+    display: block;
+    font-size: 11px;
+    color: var(--faint);
+    margin-bottom: 3px;
+  }
+
+  .wpanel__stats strong {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .wpanel__desc {
+    font-size: 14px;
+    line-height: 1.62;
+    color: var(--ink);
+    opacity: 0.86;
+    margin: 0 0 18px;
+  }
+
+  .wpanel__cta {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 44px;
+    border: none;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font-family: var(--font-body);
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 8px;
+    text-decoration: none;
+  }
+
+  .wpanel__secondary {
+    width: 100%;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+  }
+
+  .wpanel__head {
+    padding: 18px 20px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex: none;
+  }
+
+  .wpanel__kicker {
+    font-size: 11.5px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 5px;
+  }
+
+  .wpanel--list .wpanel__title {
+    font-size: 23px;
+  }
+
+  .wpanel__count {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .wpanel__head-close {
+    flex: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 18px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wpanel__rows {
+    overflow-y: auto;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .wpanel__browse {
+    flex: none;
+    margin: 0 14px 14px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 13px;
+    font-weight: 500;
+    text-decoration: none;
+  }
+
+  /* --- lightbox --------------------------------------------------------- */
+
+  .wlightbox {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(3, 11, 19, 0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    cursor: zoom-out;
+  }
+
+  .wlightbox[hidden] {
+    display: none;
+  }
+
+  .wlightbox__close {
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 22px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .wlightbox figure {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    max-width: 96vw;
+    max-height: 92vh;
+  }
+
+  .wlightbox img {
+    max-width: 96vw;
+    max-height: 78vh;
+    object-fit: contain;
+    border-radius: 12px;
+    box-shadow: 0 30px 90px -20px rgba(0, 0, 0, 0.85);
+  }
+
+  .wlightbox figcaption {
+    text-align: center;
+  }
+
+  .wlightbox__common {
+    font-family: 'Spectral', ui-serif, Georgia, serif;
+    font-size: 21px;
+    font-weight: 500;
+    color: #fff;
+  }
+
+  .wlightbox__sci {
+    font-family: 'Spectral', ui-serif, Georgia, serif;
+    font-style: italic;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.65);
+    margin-top: 3px;
+  }
+
+  /* --- rows (built in JS, so they need :global) ------------------------- */
+
+  .wpanel__rows :global(.wrow) {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    padding: 9px 10px;
+    border-radius: 13px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    width: 100%;
+    text-align: left;
+    color: inherit;
+    font: inherit;
+  }
+
+  .wpanel__rows :global(.wrow__thumb) {
+    width: 54px;
+    height: 42px;
+    border-radius: 9px;
+    overflow: hidden;
+    flex: none;
+    background: var(--surface);
+  }
+
+  .wpanel__rows :global(.wrow__thumb img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .wpanel__rows :global(.wrow__text) {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .wpanel__rows :global(.wrow__common) {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wpanel__rows :global(.wrow__sci) {
+    display: block;
+    font-family: 'Spectral', ui-serif, Georgia, serif;
+    font-style: italic;
+    font-size: 12.5px;
+    color: var(--muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .wpanel__rows :global(.wrow__dot) {
+    width: 11px;
+    height: 11px;
+    border-radius: 50%;
+    flex: none;
+  }
+</style>
+
+<script>
+  interface GraphNode {
+    id: string;
+    label: string;
+    type: string;
+    parent?: string;
+    children: string[];
+    count?: number;
+    common?: string;
+    iucn?: string;
+    desc?: string;
+    size?: string;
+    weight?: string;
+    img?: string;
+  }
+
+  const IUCN: Record<string, string> = {
+    'Least Concern': '#4FA86B',
+    'Near Threatened': '#C9A227',
+    Vulnerable: '#D98324',
+    Endangered: '#C85A3B',
+    'Critically Endangered': '#A8324A',
+    'Data Deficient': '#7E8C99',
+  };
+
+  // Ring radius per depth. The design used 215 for the first ring, which was
+  // tuned for a narrower stage: at our width the two suborders land at exactly
+  // 0 and π — the angles where the pills are widest — and collide with the
+  // root. Pushing the first ring out clears it; later rings keep the 150 step.
+  const RADII = [0, 300, 450, 600, 750, 900];
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  const ROOT = 'cetacea';
+
+  const TYPE_LABEL: Record<string, string> = {
+    order: 'Order',
+    suborder: 'Suborder',
+    family: 'Family',
+    genus: 'Genus',
+  };
+
+  function shortLabel(label: string) {
+    const m = label.match(/^(.*?)\s*\(/);
+    return m ? m[1].trim() : label;
+  }
+
+  function commonLabel(label: string) {
+    const m = label.match(/^.*?\s*\((.*)\)\s*$/);
+    return m ? m[1].trim() : '';
+  }
+
+  interface Pos {
+    x: number;
+    y: number;
+    cx: number;
+    cy: number;
+    vx: number;
+    vy: number;
+    angle: number;
+    depth: number;
+    placed: boolean;
+  }
+
+  class WhaleGraph {
+    by: Record<string, GraphNode> = {};
+    expanded = new Set<string>([ROOT]);
+    pos: Record<string, Pos> = {};
+    els: Record<string, { outer: HTMLElement; card: HTMLElement }> = {};
+    linkEls: Record<string, { path: SVGPathElement; p: string; c: string }> =
+      {};
+    pointers = new Map<number, { x: number; y: number }>();
+    view = { s: 0.7, tx: 0, ty: 0, ts: 0.7, ttx: 0, tty: 0 };
+
+    stage: HTMLElement;
+    viewport: HTMLElement;
+    crumbs: HTMLElement;
+    linksSvg: SVGSVGElement;
+
+    W = 0;
+    H = 0;
+    rscale = 1;
+    raf = 0;
+    lastVis: string[] = [];
+    selId: string | null = null;
+    started = false;
+
+    /** Panel hooks. The graph owns layout and interaction; the panel wiring
+     *  below assigns these so neither half has to reach into the other. */
+    onSpecies: (id: string) => void = () => {};
+    onList: (id: string) => void = () => {};
+    onReset: () => void = () => {};
+
+    // pointer state
+    panStart: { x: number; y: number; tx: number; ty: number } | null = null;
+    downNode: string | null = null;
+    downExp = false;
+    moved = false;
+    pinchD: number | null = null;
+    pinchW: { wx: number; wy: number; s: number } | null = null;
+
+    constructor(data: GraphNode[], stage: HTMLElement) {
+      data.forEach((n) => (this.by[n.id] = n));
+      this.stage = stage;
+      this.viewport = stage.querySelector('[data-viewport]') as HTMLElement;
+      this.crumbs = stage.querySelector('[data-crumbs]') as HTMLElement;
+
+      const svg = document.createElementNS(SVGNS, 'svg');
+      svg.setAttribute('class', 'wlinks-svg');
+      this.linksSvg = svg;
+      this.viewport.appendChild(svg);
+
+      this.bindStage();
+      this.bindControls();
+
+      // The Classic theme hides the stage entirely, so it can measure 0×0 on
+      // load. Defer the first layout until the element actually has a box.
+      this.tryStart();
+      document.addEventListener('themechange', () => this.tryStart());
+
+      const ro = new ResizeObserver(() => {
+        if (!this.started) {
+          this.tryStart();
+          return;
+        }
+        this.measure();
+        if (this.W > 0 && this.lastVis.length) {
+          this.visible();
+          this.layout();
+          this.frameToContent(true);
+        }
+      });
+      ro.observe(this.stage);
+    }
+
+    tryStart() {
+      if (this.started) return;
+      this.measure();
+      if (this.W <= 0) return;
+      this.started = true;
+      if (document.documentElement.dataset.reduce !== '1') this.makeParticles();
+      this.syncDOM(true);
+      this.frameToContent(false);
+      for (const id in this.pos) {
+        const p = this.pos[id];
+        p.cx = p.x;
+        p.cy = p.y;
+        p.vx = 0;
+        p.vy = 0;
+      }
+      this.updateCrumbs();
+      this.paintNow();
+      this.raf = requestAnimationFrame(() => this.tick());
+    }
+
+    measure() {
+      const r = this.stage.getBoundingClientRect();
+      this.W = r.width;
+      this.H = r.height;
+      this.rscale = Math.max(0.5, Math.min(1.05, this.W / 760));
+      this.stage.classList.toggle('wmobile', this.W < 560);
+    }
+
+    makeParticles() {
+      const wrap = document.createElement('div');
+      wrap.style.cssText =
+        'position:absolute;inset:0;pointer-events:none;z-index:2;';
+      for (let i = 0; i < 16; i++) {
+        const p = document.createElement('div');
+        const s = 2 + Math.random() * 4;
+        p.style.cssText =
+          `position:absolute;left:${Math.random() * 100}%;top:${20 + Math.random() * 80}%;` +
+          `width:${s}px;height:${s}px;border-radius:50%;background:var(--accent);opacity:.5;` +
+          `animation:wdrift ${9 + Math.random() * 10}s linear ${Math.random() * 8}s infinite;`;
+        wrap.appendChild(p);
+      }
+      this.stage.appendChild(wrap);
+    }
+
+    // ---- tree structure ----
+
+    kids(id: string) {
+      return (this.by[id]?.children || []).filter((c) => this.by[c]);
+    }
+
+    graphKids(id: string) {
+      return this.kids(id).filter((c) => this.by[c].type !== 'species');
+    }
+
+    visLeaf(id: string): number {
+      const k = this.graphKids(id);
+      if (!this.expanded.has(id) || !k.length) return 1;
+      return k.reduce((s, c) => s + this.visLeaf(c), 0);
+    }
+
+    visible() {
+      const ids = new Set<string>([ROOT]);
+      const order = [ROOT];
+      const edges: [string, string][] = [];
+      const walk = (id: string) => {
+        if (!this.expanded.has(id)) return;
+        for (const c of this.graphKids(id)) {
+          ids.add(c);
+          order.push(c);
+          edges.push([id, c]);
+          walk(c);
+        }
+      };
+      walk(ROOT);
+      this.lastVis = order;
+      return { ids, order, edges };
+    }
+
+    slot(id: string): Pos {
+      return (this.pos[id] ||= {
+        x: 0,
+        y: 0,
+        cx: 0,
+        cy: 0,
+        vx: 0,
+        vy: 0,
+        angle: 0,
+        depth: 0,
+        placed: false,
+      });
+    }
+
+    layout() {
+      const place = (id: string, depth: number, a0: number, a1: number) => {
+        const ang = (a0 + a1) / 2;
+        const base =
+          RADII[depth] != null
+            ? RADII[depth]
+            : RADII[RADII.length - 1] + 150 * (depth - RADII.length + 1);
+        const r = base * this.rscale;
+        const p = this.slot(id);
+        p.x = r * Math.cos(ang);
+        p.y = r * Math.sin(ang);
+        p.angle = ang;
+        p.depth = depth;
+        const k = this.graphKids(id);
+        if (this.expanded.has(id) && k.length) {
+          const weights = k.map((c) => this.visLeaf(c) + 1.2);
+          const total = weights.reduce((s, w) => s + w, 0);
+          const span = a1 - a0;
+          const pad = Math.min(span * 0.06, 0.05);
+          let cur = a0;
+          k.forEach((c, i) => {
+            const w = (weights[i] / total) * span;
+            place(c, depth + 1, cur + pad, cur + w - pad);
+            cur += w;
+          });
+        }
+      };
+
+      const p = this.slot(ROOT);
+      p.x = 0;
+      p.y = 0;
+      p.angle = -Math.PI / 2;
+      p.depth = 0;
+      const k = this.graphKids(ROOT);
+      if (this.expanded.has(ROOT) && k.length) {
+        const weights = k.map((c) => this.visLeaf(c) + 1.2);
+        const total = weights.reduce((s, w) => s + w, 0);
+        let cur = -Math.PI / 2;
+        k.forEach((c, i) => {
+          const w = (weights[i] / total) * Math.PI * 2;
+          place(c, 1, cur, cur + w);
+          cur += w;
+        });
+      }
+    }
+
+    syncDOM(first?: boolean) {
+      const vis = this.visible();
+      for (const id in this.els) if (!vis.ids.has(id)) this.exitNode(id);
+      for (const id of vis.order) if (!this.els[id]) this.createNode(id, first);
+
+      for (const key in this.linkEls) {
+        const [p, c] = key.split('>');
+        if (!vis.ids.has(p) || !vis.ids.has(c)) this.exitLink(key);
+      }
+      for (const [p, c] of vis.edges) {
+        const key = p + '>' + c;
+        if (!this.linkEls[key]) this.createLink(key, p, c, first);
+        this.linkEls[key].path.dataset.active = this.expanded.has(c)
+          ? '1'
+          : '0';
+      }
+
+      this.layout();
+
+      // New nodes grow out of their parent rather than popping in at 0,0.
+      for (const id of vis.order) {
+        const p = this.slot(id);
+        if (!p.placed) {
+          const par = this.by[id].parent;
+          const pp = par ? this.pos[par] : null;
+          p.cx = pp ? pp.cx : p.x;
+          p.cy = pp ? pp.cy : p.y;
+          p.vx = 0;
+          p.vy = 0;
+          p.placed = true;
+        }
+      }
+
+      for (const id in this.els) {
+        const exp = this.els[id].card.querySelector('.wexp');
+        if (exp) exp.textContent = this.expanded.has(id) ? '–' : '+';
+        this.els[id].card.classList.toggle('sel', id === this.selId);
+      }
+      this.paintNow();
+    }
+
+    createNode(id: string, first?: boolean) {
+      const n = this.by[id];
+      const outer = document.createElement('div');
+      outer.className = 'wnode';
+      outer.dataset.id = id;
+
+      const card = document.createElement('div');
+      card.className = 'wcard';
+      card.dataset.kind = n.type;
+      card.dataset.id = id;
+      card.setAttribute('role', 'button');
+      card.tabIndex = 0;
+
+      const dotColor =
+        n.type === 'species'
+          ? IUCN[n.iucn || ''] || IUCN['Data Deficient']
+          : `var(--w-${n.type})`;
+      card.style.setProperty('--dot', dotColor);
+
+      const dot = document.createElement('span');
+      dot.className = 'wdot';
+      card.appendChild(dot);
+
+      const lab = document.createElement('span');
+      lab.className = 'wlabel';
+
+      if (n.type === 'species') {
+        lab.textContent = n.common || n.label;
+        card.appendChild(lab);
+        const sci = document.createElement('span');
+        sci.className = 'wsci';
+        sci.textContent = n.label;
+        card.appendChild(sci);
+        card.setAttribute(
+          'aria-label',
+          `${n.common || n.label} — open details`
+        );
+      } else {
+        lab.textContent = shortLabel(n.label);
+        card.appendChild(lab);
+        const common = commonLabel(n.label);
+        if (common) {
+          const sub = document.createElement('span');
+          sub.className = 'wsub';
+          sub.textContent = common;
+          card.appendChild(sub);
+        }
+        if (n.count) {
+          const c = document.createElement('span');
+          c.className = 'wcount';
+          c.textContent = String(n.count);
+          card.appendChild(c);
+        }
+        if (this.graphKids(id).length) {
+          const exp = document.createElement('span');
+          exp.className = 'wexp';
+          exp.textContent = this.expanded.has(id) ? '–' : '+';
+          card.appendChild(exp);
+        }
+        if (n.type === 'order') card.classList.add('breathe');
+        card.setAttribute(
+          'aria-label',
+          `${shortLabel(n.label)} — list species`
+        );
+      }
+
+      outer.appendChild(card);
+      this.viewport.appendChild(outer);
+      this.els[id] = { outer, card };
+
+      if (first) card.classList.add('in');
+      else setTimeout(() => card.classList.add('in'), 20);
+    }
+
+    exitNode(id: string) {
+      const e = this.els[id];
+      if (!e) return;
+      e.card.classList.remove('in');
+      setTimeout(() => e.outer.remove(), 420);
+      delete this.els[id];
+      // Forget the position so the node grows from its parent if it returns.
+      if (this.pos[id]) this.pos[id].placed = false;
+    }
+
+    createLink(key: string, p: string, c: string, first?: boolean) {
+      const path = document.createElementNS(SVGNS, 'path');
+      path.setAttribute('class', 'wlink');
+      path.dataset.active = '0';
+      if (!first) path.style.opacity = '0';
+      this.linksSvg.appendChild(path);
+      this.linkEls[key] = { path, p, c };
+      if (!first) setTimeout(() => (path.style.opacity = '1'), 20);
+    }
+
+    exitLink(key: string) {
+      const L = this.linkEls[key];
+      if (!L) return;
+      L.path.style.opacity = '0';
+      setTimeout(() => L.path.remove(), 420);
+      delete this.linkEls[key];
+    }
+
+    linkPath(p: string, c: string) {
+      const a = this.pos[p];
+      const b = this.pos[c];
+      if (!a || !b || !a.placed || !b.placed) return '';
+      const x1 = a.cx;
+      const y1 = a.cy;
+      const x2 = b.cx;
+      const y2 = b.cy;
+      const r1 = Math.hypot(x1, y1);
+      const r2 = Math.hypot(x2, y2);
+      if (r1 < 1) {
+        return `M${x1},${y1} C${x2 * 0.28},${y2 * 0.28} ${x2 * 0.6},${y2 * 0.6} ${x2},${y2}`;
+      }
+      const mr = (r1 + r2) / 2;
+      return (
+        `M${x1},${y1} C${mr * Math.cos(a.angle)},${mr * Math.sin(a.angle)} ` +
+        `${mr * Math.cos(b.angle)},${mr * Math.sin(b.angle)} ${x2},${y2}`
+      );
+    }
+
+    paintNow() {
+      const v = this.view;
+      this.viewport.style.transform = `translate(${v.tx}px,${v.ty}px) scale(${v.s})`;
+      for (const id in this.els) {
+        const p = this.pos[id];
+        if (p?.placed)
+          this.els[id].outer.style.transform = `translate(${p.cx}px,${p.cy}px)`;
+      }
+      for (const key in this.linkEls) {
+        const d = this.linkPath(this.linkEls[key].p, this.linkEls[key].c);
+        if (d) this.linkEls[key].path.setAttribute('d', d);
+      }
+    }
+
+    tick() {
+      const k = 0.28;
+      const damp = 0.72;
+      for (const id in this.els) {
+        const p = this.pos[id];
+        if (!p?.placed) continue;
+        p.vx = p.vx * damp + (p.x - p.cx) * k;
+        p.vy = p.vy * damp + (p.y - p.cy) * k;
+        p.cx += p.vx;
+        p.cy += p.vy;
+        this.els[id].outer.style.transform = `translate(${p.cx}px,${p.cy}px)`;
+      }
+      const v = this.view;
+      v.s += (v.ts - v.s) * 0.12;
+      v.tx += (v.ttx - v.tx) * 0.13;
+      v.ty += (v.tty - v.ty) * 0.13;
+      this.viewport.style.transform = `translate(${v.tx}px,${v.ty}px) scale(${v.s})`;
+      for (const key in this.linkEls) {
+        const d = this.linkPath(this.linkEls[key].p, this.linkEls[key].c);
+        if (d) this.linkEls[key].path.setAttribute('d', d);
+      }
+      this.raf = requestAnimationFrame(() => this.tick());
+    }
+
+    clamp(v: number, a: number, b: number) {
+      return Math.max(a, Math.min(b, v));
+    }
+
+    frameToContent(animate: boolean) {
+      if (!this.W) return;
+      const ids = this.lastVis.length ? this.lastVis : Object.keys(this.els);
+      let minx = 1e9;
+      let miny = 1e9;
+      let maxx = -1e9;
+      let maxy = -1e9;
+      for (const id of ids) {
+        const p = this.pos[id];
+        if (!p) continue;
+        // Cards are centred on their node and can be far wider than they are
+        // tall, so fitting the node points alone clips the outermost pills.
+        // Grow the box by each card's own half-extent instead.
+        const card = this.els[id]?.card;
+        const hw = card ? card.offsetWidth / 2 : 0;
+        const hh = card ? card.offsetHeight / 2 : 0;
+        minx = Math.min(minx, p.x - hw);
+        miny = Math.min(miny, p.y - hh);
+        maxx = Math.max(maxx, p.x + hw);
+        maxy = Math.max(maxy, p.y + hh);
+      }
+      if (minx > maxx) return;
+      const pad = 40;
+      minx -= pad;
+      miny -= pad;
+      maxx += pad;
+      maxy += pad;
+      const bw = Math.max(maxx - minx, 10);
+      const bh = Math.max(maxy - miny, 10);
+      const s = this.clamp(Math.min(this.W / bw, this.H / bh), 0.22, 1.5);
+      const cx = (minx + maxx) / 2;
+      const cy = (miny + maxy) / 2;
+      this.view.ts = s;
+      this.view.ttx = this.W / 2 - cx * s;
+      this.view.tty = this.H / 2 - cy * s;
+      if (!animate) {
+        this.view.s = s;
+        this.view.tx = this.view.ttx;
+        this.view.ty = this.view.tty;
+      }
+    }
+
+    zoomBy(f: number) {
+      const cx = this.W / 2;
+      const cy = this.H / 2;
+      const v = this.view;
+      const wx = (cx - v.ttx) / v.ts;
+      const wy = (cy - v.tty) / v.ts;
+      v.ts = this.clamp(v.ts * f, 0.2, 2.2);
+      v.ttx = cx - wx * v.ts;
+      v.tty = cy - wy * v.ts;
+    }
+
+    resetAll() {
+      this.expanded = new Set([ROOT]);
+      this.selId = null;
+      this.onReset();
+      this.syncDOM();
+      this.frameToContent(true);
+      this.updateCrumbs();
+    }
+
+    collapseSubtree(id: string) {
+      this.expanded.delete(id);
+      for (const c of this.kids(id)) this.collapseSubtree(c);
+    }
+
+    toggle(id: string) {
+      if (this.expanded.has(id)) {
+        this.collapseSubtree(id);
+      } else {
+        const par = this.by[id].parent;
+        if (par)
+          for (const s of this.graphKids(par))
+            if (s !== id) this.collapseSubtree(s);
+        this.expanded.add(id);
+      }
+      this.syncDOM();
+      this.frameToContent(true);
+      this.updateCrumbs();
+    }
+
+    focusTo(id: string) {
+      const chain: string[] = [];
+      let cur: string | undefined = id;
+      while (cur) {
+        chain.unshift(cur);
+        cur = this.by[cur]?.parent;
+      }
+      this.expanded = new Set(chain);
+      this.syncDOM();
+      this.frameToContent(true);
+      this.updateCrumbs();
+    }
+
+    syncSel() {
+      for (const id in this.els)
+        this.els[id].card.classList.toggle('sel', id === this.selId);
+    }
+
+    updateCrumbs() {
+      const path: { id: string; label: string }[] = [];
+      let cur: string | undefined = ROOT;
+      while (cur) {
+        const n = this.by[cur];
+        if (!n) break;
+        path.push({ id: cur, label: shortLabel(n.label) });
+        cur = this.graphKids(cur).find((c) => this.expanded.has(c));
+      }
+      this.crumbs.replaceChildren();
+      path.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'wcrumb';
+        btn.textContent = c.label;
+        btn.addEventListener('click', () => this.focusTo(c.id));
+        this.crumbs.appendChild(btn);
+        if (i < path.length - 1) {
+          const sep = document.createElement('span');
+          sep.className = 'wcrumb-sep';
+          sep.textContent = '›';
+          this.crumbs.appendChild(sep);
+        }
+      });
+    }
+
+    collectSpecies(id: string, arr: string[]) {
+      for (const c of this.kids(id)) {
+        if (this.by[c].type === 'species') arr.push(c);
+        else this.collectSpecies(c, arr);
+      }
+    }
+
+    handleNodeClick(id: string) {
+      const n = this.by[id];
+      if (!n) return;
+      if (n.type === 'species') {
+        this.onSpecies(id);
+        return;
+      }
+      if (this.downExp) this.toggle(id);
+      else this.onList(id);
+    }
+
+    bindControls() {
+      this.stage
+        .querySelector('[data-zoom-in]')
+        ?.addEventListener('click', () => this.zoomBy(1.28));
+      this.stage
+        .querySelector('[data-zoom-out]')
+        ?.addEventListener('click', () => this.zoomBy(0.78));
+      this.stage
+        .querySelector('[data-reset]')
+        ?.addEventListener('click', () => this.resetAll());
+    }
+
+    bindStage() {
+      const st = this.stage;
+
+      st.addEventListener('pointerdown', (e) => {
+        if ((e.target as HTMLElement).closest('.wctrl, .wcrumb')) return;
+        this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (this.pointers.size === 2) {
+          this.panStart = null;
+          this.pinchD = null;
+          return;
+        }
+        const card = (e.target as HTMLElement).closest(
+          '.wnode'
+        ) as HTMLElement | null;
+        this.downNode = card ? card.dataset.id || null : null;
+        this.downExp = !!(e.target as HTMLElement).closest('.wexp');
+        this.panStart = {
+          x: e.clientX,
+          y: e.clientY,
+          tx: this.view.ttx,
+          ty: this.view.tty,
+        };
+        this.moved = false;
+        try {
+          st.setPointerCapture(e.pointerId);
+        } catch {
+          /* capture unsupported for this pointer — panning still works */
+        }
+      });
+
+      st.addEventListener('pointermove', (e) => {
+        if (this.pointers.has(e.pointerId))
+          this.pointers.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (this.pointers.size >= 2) {
+          this.doPinch();
+          return;
+        }
+        if (this.panStart) {
+          const dx = e.clientX - this.panStart.x;
+          const dy = e.clientY - this.panStart.y;
+          if (Math.abs(dx) + Math.abs(dy) > 5) this.moved = true;
+          const v = this.view;
+          v.ttx = this.panStart.tx + dx;
+          v.tty = this.panStart.ty + dy;
+          v.tx = v.ttx;
+          v.ty = v.tty;
+        }
+      });
+
+      const end = (e: PointerEvent) => {
+        this.pointers.delete(e.pointerId);
+        if (this.pointers.size < 2) this.pinchD = null;
+        if (this.panStart && !this.moved && this.downNode)
+          this.handleNodeClick(this.downNode);
+        this.panStart = null;
+        this.downNode = null;
+        try {
+          st.releasePointerCapture(e.pointerId);
+        } catch {
+          /* pointer already released */
+        }
+      };
+      st.addEventListener('pointerup', end);
+      st.addEventListener('pointercancel', end);
+
+      // Keyboard parity for the pointer-driven nodes: Enter/Space opens the
+      // panel, Shift+Enter expands or collapses a branch.
+      st.addEventListener('keydown', (e) => {
+        const card = (e.target as HTMLElement).closest(
+          '.wcard'
+        ) as HTMLElement | null;
+        if (!card || (e.key !== 'Enter' && e.key !== ' ')) return;
+        e.preventDefault();
+        const id = card.dataset.id!;
+        this.downExp = false;
+        if (this.by[id]?.type !== 'species' && e.shiftKey) this.toggle(id);
+        else this.handleNodeClick(id);
+      });
+
+      st.addEventListener(
+        'wheel',
+        (e) => {
+          e.preventDefault();
+          const r = st.getBoundingClientRect();
+          const cx = e.clientX - r.left;
+          const cy = e.clientY - r.top;
+          const v = this.view;
+          const f = e.deltaY < 0 ? 1.12 : 0.89;
+          const wx = (cx - v.ttx) / v.ts;
+          const wy = (cy - v.tty) / v.ts;
+          v.ts = this.clamp(v.ts * f, 0.2, 2.4);
+          v.ttx = cx - wx * v.ts;
+          v.tty = cy - wy * v.ts;
+        },
+        { passive: false }
+      );
+    }
+
+    doPinch() {
+      const pts = [...this.pointers.values()];
+      if (pts.length < 2) return;
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const r = this.stage.getBoundingClientRect();
+      const cx = (pts[0].x + pts[1].x) / 2 - r.left;
+      const cy = (pts[0].y + pts[1].y) / 2 - r.top;
+      const v = this.view;
+      if (!this.pinchD) {
+        this.pinchD = dist;
+        this.pinchW = {
+          wx: (cx - v.ttx) / v.ts,
+          wy: (cy - v.tty) / v.ts,
+          s: v.ts,
+        };
+        return;
+      }
+      const s = this.clamp(this.pinchW!.s * (dist / this.pinchD), 0.2, 2.4);
+      v.ts = s;
+      v.ttx = cx - this.pinchW!.wx * s;
+      v.tty = cy - this.pinchW!.wy * s;
+      v.tx = v.ttx;
+      v.ty = v.tty;
+    }
+  }
+
+  // ---- panels -------------------------------------------------------------
+
+  const dataEl = document.querySelector('[data-whale-graph-data]');
+  const stageEl = document.querySelector('[data-stage]') as HTMLElement | null;
+
+  if (dataEl && stageEl) {
+    const data: GraphNode[] = JSON.parse(dataEl.textContent || '[]');
+    const graph = new WhaleGraph(data, stageEl);
+    const by = graph.by;
+
+    const speciesPanel = document.querySelector(
+      '[data-species-panel]'
+    ) as HTMLElement;
+    const listPanel = document.querySelector(
+      '[data-list-panel]'
+    ) as HTMLElement;
+    const lightbox = document.querySelector('[data-lightbox]') as HTMLElement;
+
+    const q = <T extends Element>(sel: string) =>
+      document.querySelector(sel) as T;
+
+    const closePanels = () => {
+      speciesPanel.hidden = true;
+      listPanel.hidden = true;
+      graph.selId = null;
+      graph.syncSel();
+    };
+
+    const openSpecies = (id: string) => {
+      const n = by[id];
+      if (!n) return;
+      const genus = n.parent ? by[n.parent] : undefined;
+      const family = genus?.parent ? by[genus.parent] : undefined;
+      const lineage = [family && shortLabel(family.label), genus && genus.label]
+        .filter(Boolean)
+        .join(' · ');
+      const color = IUCN[n.iucn || ''] || IUCN['Data Deficient'];
+
+      const img = q<HTMLImageElement>('[data-sp-img]');
+      img.src = n.img || '';
+      img.alt = n.common || n.label;
+      img.style.display = n.img ? '' : 'none';
+
+      q<HTMLElement>('[data-sp-lineage]').textContent = lineage;
+      q<HTMLElement>('[data-sp-common]').textContent = n.common || n.label;
+      q<HTMLElement>('[data-sp-sci]').textContent = n.label;
+      q<HTMLElement>('[data-sp-size]').textContent = n.size || '—';
+      q<HTMLElement>('[data-sp-weight]').textContent = n.weight || '—';
+      q<HTMLElement>('[data-sp-desc]').textContent = n.desc || '';
+
+      const statusEl = q<HTMLElement>('[data-sp-status]');
+      statusEl.textContent = n.iucn || 'Not Evaluated';
+      statusEl.style.background = color;
+
+      q<HTMLAnchorElement>('[data-sp-link]').href = `/species/${id}`;
+
+      const siblings = q<HTMLButtonElement>('[data-sp-siblings]');
+      if (genus) {
+        siblings.hidden = false;
+        siblings.textContent = `All ${genus.label}`;
+        siblings.onclick = () => openList(genus.id);
+      } else {
+        siblings.hidden = true;
+      }
+
+      listPanel.hidden = true;
+      speciesPanel.hidden = false;
+      graph.selId = id;
+      graph.syncSel();
+    };
+
+    const openList = (id: string) => {
+      const n = by[id];
+      if (!n) return;
+      const ids: string[] = [];
+      graph.collectSpecies(id, ids);
+      const common = commonLabel(n.label);
+
+      q<HTMLElement>('[data-lp-kicker]').textContent = [
+        TYPE_LABEL[n.type],
+        common,
+      ]
+        .filter(Boolean)
+        .join(' · ');
+      q<HTMLElement>('[data-lp-title]').textContent = shortLabel(n.label);
+      q<HTMLElement>('[data-lp-count]').textContent = `${ids.length} species`;
+      q<HTMLAnchorElement>('[data-lp-link]').href = `/${n.type}/${id}`;
+
+      const rows = q<HTMLElement>('[data-lp-rows]');
+      rows.replaceChildren();
+      for (const sid of ids) {
+        const s = by[sid];
+        const row = document.createElement('button');
+        row.type = 'button';
+        row.className = 'wrow';
+        row.innerHTML =
+          `<span class="wrow__thumb">${s.img ? `<img src="${s.img}" alt="" loading="lazy">` : ''}</span>` +
+          `<span class="wrow__text"><span class="wrow__common"></span><span class="wrow__sci"></span></span>` +
+          `<span class="wrow__dot"></span>`;
+        row.querySelector('.wrow__common')!.textContent = s.common || s.label;
+        row.querySelector('.wrow__sci')!.textContent = s.label;
+        const dot = row.querySelector('.wrow__dot') as HTMLElement;
+        const color = IUCN[s.iucn || ''] || IUCN['Data Deficient'];
+        dot.style.background = color;
+        dot.style.boxShadow = `0 0 8px ${color}`;
+        dot.title = s.iucn || 'Data Deficient';
+        row.addEventListener('click', () => openSpecies(sid));
+        rows.appendChild(row);
+      }
+
+      speciesPanel.hidden = true;
+      listPanel.hidden = false;
+      graph.selId = null;
+      graph.syncSel();
+    };
+
+    const openLightbox = (id: string) => {
+      const n = by[id];
+      if (!n?.img) return;
+      const img = q<HTMLImageElement>('[data-lb-img]');
+      img.src = n.img;
+      img.alt = n.common || n.label;
+      q<HTMLElement>('[data-lb-common]').textContent = n.common || n.label;
+      q<HTMLElement>('[data-lb-sci]').textContent = n.label;
+      lightbox.hidden = false;
+    };
+
+    graph.onSpecies = openSpecies;
+    graph.onList = openList;
+    graph.onReset = closePanels;
+
+    speciesPanel
+      .querySelector('[data-sp-close]')!
+      .addEventListener('click', closePanels);
+    listPanel
+      .querySelector('[data-lp-close]')!
+      .addEventListener('click', closePanels);
+
+    const zoomSpecies = () => {
+      if (graph.selId) openLightbox(graph.selId);
+    };
+    speciesPanel
+      .querySelector('[data-sp-img]')!
+      .addEventListener('click', zoomSpecies);
+    speciesPanel
+      .querySelector('[data-sp-zoom]')!
+      .addEventListener('click', zoomSpecies);
+
+    lightbox.addEventListener('click', () => (lightbox.hidden = true));
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (!lightbox.hidden) lightbox.hidden = true;
+      else closePanels();
+    });
+
+    // Leaving the Atlas theme takes the stage with it; drop any open panel so
+    // it doesn't hover over the Classic page.
+    document.addEventListener('themechange', (e) => {
+      if ((e as CustomEvent).detail?.theme === 'classic') {
+        lightbox.hidden = true;
+        closePanels();
+      }
+    });
+  }
+</script>

@@ -1,0 +1,333 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import SpeciesCard from '../../components/SpeciesCard.astro';
+import {
+  allSpecies,
+  byId,
+  counts,
+  IUCN_COLORS,
+  IUCN_ORDER,
+} from '../../utils/whales';
+
+const suborderTabs = [
+  { key: 'all', label: 'All' },
+  { key: 'mysticeti', label: 'Baleen' },
+  { key: 'odontoceti', label: 'Toothed' },
+];
+
+// Only offer a status chip for a status something actually has.
+const statuses = IUCN_ORDER.filter((s) =>
+  allSpecies.some((sp) => sp.iucn === s)
+);
+---
+
+<Layout
+  title="Every whale, by species | Whale Encyclopedia"
+  description={`Browse all ${counts.species} living whale species. Filter by lineage or conservation status, or search by name.`}
+>
+  <section>
+    <div class="kicker atlas-only">Field guide</div>
+    <h1 class="t-display page-title">Every whale, by species</h1>
+    <p class="page-lede">
+      Filter by lineage or conservation status, or search by name.{' '}
+      <span data-count>{counts.species}</span> of {counts.species} species shown.
+    </p>
+
+    <div class="filters">
+      <label class="sr-only" for="species-search">Search whales</label>
+      <input
+        id="species-search"
+        class="wsearch wglass"
+        type="search"
+        placeholder="Search whales…"
+        autocomplete="off"
+        data-search
+      />
+      <div
+        class="filters__tabs wglass"
+        role="group"
+        aria-label="Filter by suborder"
+      >
+        {
+          suborderTabs.map((t) => (
+            <button
+              class="wtab"
+              type="button"
+              data-suborder-tab={t.key}
+              aria-pressed={t.key === 'all' ? 'true' : 'false'}
+            >
+              {t.label}
+            </button>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="chips" role="group" aria-label="Filter by conservation status">
+      <button
+        class="wchip wglass"
+        type="button"
+        data-status-chip="all"
+        aria-pressed="true"
+      >
+        <span style="background:transparent;"></span>All status
+      </button>
+      {
+        statuses.map((s) => (
+          <button
+            class="wchip wglass"
+            type="button"
+            data-status-chip={s}
+            aria-pressed="false"
+          >
+            <span style={`background:${IUCN_COLORS[s]};`} />
+            {s}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="grid" data-grid>
+      {
+        allSpecies.map((s) => (
+          <div
+            class="grid__cell"
+            data-species
+            data-suborder={s.suborderId}
+            data-status={s.iucn}
+            data-haystack={`${s.common} ${s.sci} ${s.family} ${s.genus}`.toLowerCase()}
+          >
+            <SpeciesCard species={byId[s.id]} kicker={s.family} />
+          </div>
+        ))
+      }
+    </div>
+
+    <p class="grid__empty" data-empty hidden>
+      No species match those filters. <button type="button" data-clear
+        >Clear all</button
+      >
+    </p>
+  </section>
+</Layout>
+
+<style>
+  .kicker {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 16px;
+  }
+
+  .page-title {
+    font-size: clamp(36px, 5.4vw, 60px);
+    line-height: 1;
+    letter-spacing: -1px;
+    margin: 0 0 16px;
+  }
+
+  :global(html[data-theme='classic']) .page-title {
+    font-size: clamp(28px, 4vw, 40px);
+    letter-spacing: normal;
+    line-height: 1.15;
+  }
+
+  .page-lede {
+    font-size: clamp(15px, 2vw, 17px);
+    line-height: 1.6;
+    color: var(--muted);
+    max-width: 520px;
+    margin: 0 0 32px;
+  }
+
+  .filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    align-items: center;
+    margin-bottom: 14px;
+  }
+
+  .wsearch {
+    flex: 1;
+    min-width: 200px;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+  }
+
+  .filters__tabs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    border: 1px solid var(--border);
+  }
+
+  .filters__tabs .wtab {
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 13px;
+    font-weight: 500;
+    padding: 7px 16px;
+    border-radius: var(--radius-pill);
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 32px;
+  }
+
+  .chips .wchip {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    height: 32px;
+    padding: 0 14px;
+    border-radius: var(--radius-pill);
+  }
+
+  .chips .wchip span {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    flex: none;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+  }
+
+  .grid__cell[hidden] {
+    display: none;
+  }
+
+  .grid__empty {
+    margin-top: 40px;
+    color: var(--muted);
+    font-size: 15px;
+  }
+
+  .grid__empty[hidden] {
+    display: none;
+  }
+
+  .grid__empty button {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+  }
+
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+</style>
+
+<script>
+  const grid = document.querySelector('[data-grid]');
+  const search = document.querySelector(
+    '[data-search]'
+  ) as HTMLInputElement | null;
+
+  if (grid && search) {
+    const cells = Array.from(
+      grid.querySelectorAll<HTMLElement>('[data-species]')
+    );
+    const countEl = document.querySelector('[data-count]')!;
+    const emptyEl = document.querySelector('[data-empty]') as HTMLElement;
+    const subTabs = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-suborder-tab]')
+    );
+    const chips = Array.from(
+      document.querySelectorAll<HTMLElement>('[data-status-chip]')
+    );
+
+    let suborder = 'all';
+    let status = 'all';
+    let query = '';
+
+    function apply() {
+      let shown = 0;
+      for (const cell of cells) {
+        const matches =
+          (suborder === 'all' || cell.dataset.suborder === suborder) &&
+          (status === 'all' || cell.dataset.status === status) &&
+          (query === '' || (cell.dataset.haystack || '').includes(query));
+        cell.hidden = !matches;
+        if (matches) shown++;
+      }
+      countEl.textContent = String(shown);
+      emptyEl.hidden = shown > 0;
+    }
+
+    function setPressed(group: HTMLElement[], active: HTMLElement) {
+      for (const el of group)
+        el.setAttribute('aria-pressed', String(el === active));
+    }
+
+    search.addEventListener('input', () => {
+      query = search.value.trim().toLowerCase();
+      apply();
+    });
+
+    for (const tab of subTabs) {
+      tab.addEventListener('click', () => {
+        suborder = tab.dataset.suborderTab!;
+        setPressed(subTabs, tab);
+        apply();
+      });
+    }
+
+    for (const chip of chips) {
+      chip.addEventListener('click', () => {
+        status = chip.dataset.statusChip!;
+        setPressed(chips, chip);
+        apply();
+      });
+    }
+
+    document.querySelector('[data-clear]')?.addEventListener('click', () => {
+      suborder = 'all';
+      status = 'all';
+      query = '';
+      search.value = '';
+      setPressed(subTabs, subTabs[0]);
+      setPressed(chips, chips[0]);
+      apply();
+    });
+  }
+</script>

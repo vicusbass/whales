@@ -13,7 +13,12 @@
       "type": "suborder",
       "parent": "cetacea",
       "species_count": 15,
-      "children": ["balaenopteridae", "balaenidae", "eschrichtiidae", "cetotheriidae"]
+      "children": [
+        "balaenopteridae",
+        "balaenidae",
+        "eschrichtiidae",
+        "cetotheriidae"
+      ]
     },
     {
       "id": "odontoceti",
@@ -77,7 +82,14 @@
       "type": "family",
       "parent": "odontoceti",
       "species_count": 24,
-      "children": ["ziphius", "berardius", "tasmacetus", "hyperoodon", "indopacetus", "mesoplodon"]
+      "children": [
+        "ziphius",
+        "berardius",
+        "tasmacetus",
+        "hyperoodon",
+        "indopacetus",
+        "mesoplodon"
+      ]
     },
     {
       "id": "monodontidae",
@@ -93,7 +105,16 @@
       "type": "genus",
       "parent": "balaenopteridae",
       "species_count": 8,
-      "children": ["b_acutorostrata", "b_bonaerensis", "b_borealis", "b_edeni", "b_ricei", "b_musculus", "b_omurai", "b_physalus"]
+      "children": [
+        "b_acutorostrata",
+        "b_bonaerensis",
+        "b_borealis",
+        "b_edeni",
+        "b_ricei",
+        "b_musculus",
+        "b_omurai",
+        "b_physalus"
+      ]
     },
     {
       "id": "megaptera",
@@ -197,7 +218,25 @@
       "type": "genus",
       "parent": "ziphiidae",
       "species_count": 17,
-      "children": ["m_mirus", "m_europaeus", "m_bidens", "m_densirostris", "m_hectori", "m_carlhubbsi", "m_stejnegeri", "m_bowdoini", "m_ginkgodens", "m_grayi", "m_layardii", "m_peruvianus", "m_perrin", "m_perrini", "m_traversii", "m_hotaula", "m_eueu"]
+      "children": [
+        "m_mirus",
+        "m_europaeus",
+        "m_bidens",
+        "m_densirostris",
+        "m_hectori",
+        "m_carlhubbsi",
+        "m_stejnegeri",
+        "m_bowdoini",
+        "m_ginkgodens",
+        "m_grayi",
+        "m_layardii",
+        "m_peruvianus",
+        "m_perrin",
+        "m_perrini",
+        "m_traversii",
+        "m_hotaula",
+        "m_eueu"
+      ]
     },
     {
       "id": "delphinapterus",
@@ -258,7 +297,7 @@
       "iucn_status": "Data Deficient",
       "size": "12-15m",
       "weight": "12-25 tons",
-      "author":"By Morningdew - Selbst erstellt, Olympus mju4; mit Photoshop bearbeitet u. reduziert, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1006683"
+      "author": "By Morningdew - Selbst erstellt, Olympus mju4; mit Photoshop bearbeitet u. reduziert, CC BY-SA 3.0, https://commons.wikimedia.org/w/index.php?curid=1006683"
     },
     {
       "id": "b_ricei",
@@ -270,7 +309,7 @@
       "iucn_status": "Critically Endangered",
       "size": "up to 12.65m",
       "weight": "up to 27 tons",
-      "author":"By National Oceanic and Atmospheric Association (NOAA) - https://www.msn.com/en-us/news/us/new-whale-species-discovered-in-the-gulf-of-mexico-%E2%80%94-but-its-already-going-extinct/ar-BB1d9oOU, Public Domain, https://commons.wikimedia.org/w/index.php?curid=99713106"
+      "author": "By National Oceanic and Atmospheric Association (NOAA) - https://www.msn.com/en-us/news/us/new-whale-species-discovered-in-the-gulf-of-mexico-%E2%80%94-but-its-already-going-extinct/ar-BB1d9oOU, Public Domain, https://commons.wikimedia.org/w/index.php?curid=99713106"
     },
     {
       "id": "b_musculus",
@@ -681,7 +720,7 @@
       "iucn_status": "Data Deficient",
       "size": "5.0-5.5m",
       "weight": "1.5 tons",
-      "author":"By This W3C-unspecified vector image was created with Inkscape . - Own work, CC BY 3.0, https://commons.wikimedia.org/w/index.php?curid=22666932"
+      "author": "By This W3C-unspecified vector image was created with Inkscape . - Own work, CC BY 3.0, https://commons.wikimedia.org/w/index.php?curid=22666932"
     },
     {
       "id": "m_hotaula",

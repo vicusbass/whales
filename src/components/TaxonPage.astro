@@ -1,0 +1,182 @@
+---
+import Layout from '../layouts/Layout.astro';
+import SpeciesCard from '../components/SpeciesCard.astro';
+import Breadcrumbs from '../components/Breadcrumbs.astro';
+import {
+  byId,
+  commonLabel,
+  lineageOf,
+  shortLabel,
+  speciesUnder,
+  type WhaleNode,
+} from '../utils/whales';
+
+export interface Props {
+  taxon: WhaleNode;
+  /** Heading above the grid, e.g. "Species in this Family". */
+  heading: string;
+  title: string;
+  description: string;
+}
+
+const { taxon, heading, title, description } = Astro.props;
+
+const species = speciesUnder(taxon.id);
+const trail = lineageOf(taxon.id);
+const rank = taxon.type.charAt(0).toUpperCase() + taxon.type.slice(1);
+
+// Most taxon labels carry their common name in parentheses
+// ("Balaenopteridae (Rorquals)"); split it out so the heading can be clean.
+const name = shortLabel(taxon.label);
+const common = taxon.common_name || commonLabel(taxon.label);
+
+/** Family name for the Atlas card kicker — species cards sit under mixed ranks. */
+function kickerFor(s: WhaleNode) {
+  const genus = s.parent ? byId[s.parent] : undefined;
+  const family = genus?.parent ? byId[genus.parent] : undefined;
+  return family ? shortLabel(family.label) : undefined;
+}
+---
+
+<Layout title={title} description={description}>
+  <Breadcrumbs trail={trail} />
+
+  <header class="taxon">
+    <div class="kicker atlas-only">{rank}</div>
+    <h1 class="t-display taxon__name">{name}</h1>
+    {common && <p class="taxon__common">{common}</p>}
+    {taxon.description && <p class="taxon__desc">{taxon.description}</p>}
+
+    <div class="taxon__stats atlas-only">
+      <div>
+        <div class="t-display taxon__stat-value">{species.length}</div>
+        <div class="taxon__stat-label">species</div>
+      </div>
+    </div>
+  </header>
+
+  <h2 class="t-display taxon__heading">{heading}</h2>
+
+  <div class="taxon__grid">
+    {species.map((s) => <SpeciesCard species={s} kicker={kickerFor(s)} />)}
+  </div>
+</Layout>
+
+<style>
+  .kicker {
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 1.6px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .taxon__name {
+    font-size: clamp(34px, 4.8vw, 54px);
+    line-height: 1;
+    letter-spacing: -0.8px;
+    margin: 0 0 10px;
+  }
+
+  .taxon__common {
+    font-family: var(--font-display);
+    font-size: clamp(17px, 2.2vw, 21px);
+    color: var(--muted);
+    margin: 0 0 20px;
+  }
+
+  .taxon__desc {
+    font-size: 16px;
+    line-height: 1.7;
+    color: var(--muted);
+    max-width: 640px;
+    margin: 0 0 8px;
+  }
+
+  .taxon__stats {
+    display: flex;
+    gap: 40px;
+    flex-wrap: wrap;
+    margin-top: 28px;
+    padding: 24px 0;
+    border-top: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .taxon__stat-value {
+    font-size: 36px;
+    line-height: 1;
+  }
+
+  .taxon__stat-label {
+    font-size: 12.5px;
+    color: var(--muted);
+    margin-top: 8px;
+  }
+
+  .taxon__heading {
+    font-size: clamp(22px, 2.6vw, 28px);
+    letter-spacing: -0.3px;
+    margin: 48px 0 20px;
+  }
+
+  .taxon__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 18px;
+  }
+
+  /* --- Classic ----------------------------------------------------------- */
+
+  :global(html[data-theme='classic']) .taxon__name {
+    font-size: 1.875rem;
+    line-height: 1.15;
+    letter-spacing: normal;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  @media (min-width: 768px) {
+    :global(html[data-theme='classic']) .taxon__name {
+      font-size: 2.25rem;
+    }
+  }
+
+  :global(html[data-theme='classic']) .taxon__common {
+    font-family: inherit;
+    font-size: 1.25rem;
+    color: #374151;
+    margin-bottom: 1.5rem;
+  }
+
+  :global(html[data-theme='classic']) .taxon__desc {
+    font-size: 1rem;
+    color: #374151;
+    margin-bottom: 2rem;
+  }
+
+  :global(html[data-theme='classic']) .taxon__heading {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: normal;
+    margin: 0 0 1rem;
+  }
+
+  :global(html[data-theme='classic']) .taxon__grid {
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 768px) {
+    :global(html[data-theme='classic']) .taxon__grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+
+  @media (min-width: 1024px) {
+    :global(html[data-theme='classic']) .taxon__grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+</style>

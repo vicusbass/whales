@@ -1,0 +1,82 @@
+---
+/**
+ * Flips <html data-theme> between "atlas" (default) and "classic".
+ *
+ * Both labels ship in the markup and the theme decides which one is visible,
+ * so the button never has to be re-rendered and reads correctly on a static
+ * page before any JS has run.
+ */
+---
+
+<button
+  type="button"
+  class="theme-toggle wglass"
+  data-theme-toggle
+  aria-live="polite"
+>
+  <span class="icon-[tabler--palette] theme-toggle__icon"></span>
+  <span class="atlas-only">Classic theme</span>
+  <span class="classic-only">Atlas theme</span>
+</button>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    height: 34px;
+    padding: 0 15px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--muted);
+    font-family: var(--font-body);
+    font-size: 12.5px;
+    font-weight: 500;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+      color 0.2s,
+      border-color 0.2s;
+  }
+
+  .theme-toggle:hover {
+    color: var(--accent);
+    border-color: var(--border-2);
+  }
+
+  .theme-toggle__icon {
+    width: 15px;
+    height: 15px;
+    flex: none;
+  }
+</style>
+
+<script>
+  const STORAGE_KEY = 'whale-theme';
+
+  function applyTheme(theme: 'atlas' | 'classic') {
+    document.documentElement.dataset.theme = theme;
+    try {
+      localStorage.setItem(STORAGE_KEY, theme);
+    } catch {
+      /* Private mode or blocked storage — the choice just won't survive a reload. */
+    }
+    // The radial graph only exists in the Atlas theme and has to (re)measure
+    // itself once it becomes visible; the homepage listens for this.
+    document.dispatchEvent(
+      new CustomEvent('themechange', { detail: { theme } })
+    );
+  }
+
+  document.addEventListener('click', (event) => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest('[data-theme-toggle]');
+    if (!button) return;
+    const current =
+      document.documentElement.dataset.theme === 'classic'
+        ? 'classic'
+        : 'atlas';
+    applyTheme(current === 'classic' ? 'atlas' : 'classic');
+  });
+</script>
