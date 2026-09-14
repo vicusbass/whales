@@ -2,7 +2,24 @@
 import Layout from '../layouts/Layout.astro';
 import WhaleTreeView from '../components/WhaleTreeView.astro';
 import WhaleGraph from '../components/WhaleGraph.astro';
-import { counts, iucnBreakdown } from '../utils/whales';
+import {
+  byId,
+  childrenOf,
+  counts,
+  iucnBreakdown,
+  nodes,
+  shortLabel,
+  speciesUnder,
+} from '../utils/whales';
+import { TAXON_COPY } from '../data/taxonCopy';
+import {
+  canonicalUrl,
+  graph,
+  higherTaxon,
+  publisher,
+  webPage,
+  webSite,
+} from '../utils/seo';
 
 // "forty-four" in the hero is spelled out in the design; keep the numeral and
 // the word in step if the dataset ever changes.
@@ -21,12 +38,42 @@ const stats = [
   { value: counts.families, label: 'families' },
   { value: counts.suborders, label: 'suborders — baleen & toothed' },
 ];
+
+// The radial graph builds its nodes in the browser, so the families and genera
+// it draws are not links a crawler can follow. This strip is the same tree in
+// markup: it is the only place on the site, outside a species' breadcrumbs,
+// where every family and genus page is linked.
+const familyIndex = nodes
+  .filter((n) => n.type === 'suborder')
+  .map((suborder) => ({
+    suborder,
+    families: childrenOf(suborder.id)
+      .filter((n) => n.type === 'family')
+      .map((family) => ({
+        family,
+        genera: childrenOf(family.id).filter((n) => n.type === 'genus'),
+        count: speciesUnder(family.id).length,
+      })),
+  }));
+
+const description =
+  'An atlas of every living whale species, mapped across the branches of life — taxonomy, photographs and IUCN conservation status for all 44.';
+
+const url = canonicalUrl('/');
+const jsonLd = graph([
+  webSite(),
+  publisher(),
+  webPage({
+    url,
+    name: 'Whale Encyclopedia',
+    description,
+    primaryEntityId: `${canonicalUrl('/order/cetacea')}#taxon`,
+  }),
+  higherTaxon(byId.cetacea, childrenOf('cetacea'), TAXON_COPY.cetacea?.summary),
+]);
 ---
 
-<Layout
-  title="Whale Encyclopedia"
-  description="An atlas of every living whale species, mapped across the branches of life."
->
+<Layout title="Whale Encyclopedia" description={description} jsonLd={jsonLd}>
   {/* ---------- Atlas ---------- */}
   <div class="atlas-only">
     <section class="hero">
@@ -92,11 +139,16 @@ const stats = [
   {/* ---------- Classic ---------- */}
   <div class="classic-only">
     <section class="mb-8">
-      <h1
-        class="mb-4 border-b border-blue-300 pb-2 text-xl font-bold md:text-2xl"
+      {
+        /* An <h2>, not an <h1>: the Atlas hero above is this document's single
+          <h1>, and both themes are present in the markup at once. `t-h1`
+          keeps the Dela Gothic face the Classic theme gave it as an h1. */
+      }
+      <h2
+        class="t-h1 mb-4 border-b border-blue-300 pb-2 text-xl font-bold md:text-2xl"
       >
         Whale Taxonomy Tree
-      </h1>
+      </h2>
       <p class="mb-6 text-gray-600 md:text-lg">
         Explore the taxonomic classification of whales from order down to genus
         level. Click the + sign to expand each category and discover the
@@ -144,9 +196,159 @@ const stats = [
       </div>
     </section>
   </div>
+
+  {/* Shared by both themes — the crawlable index of the taxonomy. */}
+  <section class="browse">
+    <h2 class="t-display browse__title">Browse the taxonomy</h2>
+    <p class="browse__lede">
+      Every family and genus in the order, and the species each one holds.
+    </p>
+
+    {
+      familyIndex.map(({ suborder, families }) => (
+        <div class="browse__group">
+          <h3 class="browse__suborder">
+            <a href={`/suborder/${suborder.id}`}>
+              {shortLabel(suborder.label)}
+            </a>
+            <span>{suborder.common_name ?? ''}</span>
+          </h3>
+          <ul class="browse__families">
+            {families.map(({ family, genera, count }) => (
+              <li>
+                <a class="browse__family" href={`/family/${family.id}`}>
+                  {shortLabel(family.label)}
+                </a>
+                <span class="browse__count">{count} species</span>
+                <ul class="browse__genera">
+                  {genera.map((genus) => (
+                    <li>
+                      <a href={`/genus/${genus.id}`}>
+                        {shortLabel(genus.label)}
+                      </a>
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))
+    }
+  </section>
 </Layout>
 
 <style>
+  /* --- taxonomy index ---------------------------------------------------- */
+
+  .browse {
+    margin: 52px 0 16px;
+  }
+
+  .browse__title {
+    font-size: clamp(24px, 3.4vw, 34px);
+    line-height: 1.1;
+    margin: 0 0 10px;
+  }
+
+  .browse__lede {
+    font-size: 15px;
+    color: var(--muted);
+    margin: 0 0 26px;
+  }
+
+  .browse__group + .browse__group {
+    margin-top: 28px;
+  }
+
+  .browse__suborder {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 1.4px;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 14px;
+  }
+
+  .browse__suborder span {
+    color: var(--faint);
+    letter-spacing: 0.3px;
+    text-transform: none;
+    font-weight: 400;
+  }
+
+  .browse__families {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 14px;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  }
+
+  .browse__families > li {
+    border: 1px solid var(--border);
+    background: var(--surface);
+    border-radius: var(--radius-card);
+    padding: 14px 16px 15px;
+  }
+
+  .browse__family {
+    font-family: var(--font-display);
+    font-size: 16px;
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .browse__count {
+    display: block;
+    font-size: 11.5px;
+    color: var(--faint);
+    margin-top: 2px;
+  }
+
+  .browse__genera {
+    list-style: none;
+    margin: 10px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .browse__genera a {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--border);
+    font-size: 12px;
+    font-style: italic;
+    color: var(--muted);
+    text-decoration: none;
+  }
+
+  .browse a:hover {
+    color: var(--accent);
+  }
+
+  :global(html[data-theme='classic']) .browse__title {
+    font-size: clamp(20px, 3vw, 24px);
+    border-bottom: 1px solid #93c5fd;
+    padding-bottom: 0.5rem;
+  }
+
+  :global(html[data-theme='classic']) .browse__families > li {
+    background: #fff;
+    border-color: #e5e7eb;
+  }
+
+  :global(html[data-theme='classic']) .browse__genera a {
+    border-color: #e5e7eb;
+  }
+
   .hero {
     max-width: 680px;
     margin: 30px 0 40px;

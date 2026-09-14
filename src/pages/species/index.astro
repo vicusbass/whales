@@ -7,7 +7,17 @@ import {
   counts,
   IUCN_COLORS,
   IUCN_ORDER,
+  nodes,
 } from '../../utils/whales';
+import {
+  canonicalUrl,
+  graph,
+  publisher,
+  socialImageForTaxon,
+  taxonItemList,
+  webPage,
+  webSite,
+} from '../../utils/seo';
 
 const suborderTabs = [
   { key: 'all', label: 'All' },
@@ -19,12 +29,30 @@ const suborderTabs = [
 const statuses = IUCN_ORDER.filter((s) =>
   allSpecies.some((sp) => sp.iucn === s)
 );
+
+const speciesNodes = nodes.filter((n) => n.type === 'species');
+
+const title = `All ${counts.species} whale species, A-Z | Whale Encyclopedia`;
+const description = `Every living whale species — all ${counts.species} of them — with photographs, scientific names, size and IUCN Red List status. Filter by lineage or conservation status.`;
+
+const url = canonicalUrl('/species');
+const social = await socialImageForTaxon(byId.cetacea, speciesNodes);
+const jsonLd = graph([
+  webSite(),
+  publisher(),
+  {
+    ...webPage({
+      url,
+      name: 'Every whale, by species',
+      description,
+    }),
+    '@type': 'CollectionPage',
+  },
+  taxonItemList(url, 'Living whale species', speciesNodes),
+]);
 ---
 
-<Layout
-  title="Every whale, by species | Whale Encyclopedia"
-  description={`Browse all ${counts.species} living whale species. Filter by lineage or conservation status, or search by name.`}
->
+<Layout title={title} description={description} image={social} jsonLd={jsonLd}>
   <section>
     <div class="kicker atlas-only">Field guide</div>
     <h1 class="t-display page-title">Every whale, by species</h1>
@@ -95,7 +123,7 @@ const statuses = IUCN_ORDER.filter((s) =>
             data-species
             data-suborder={s.suborderId}
             data-status={s.iucn}
-            data-haystack={`${s.common} ${s.sci} ${s.family} ${s.genus}`.toLowerCase()}
+            data-haystack={`${s.common} ${s.sci} ${s.binomial} ${s.family} ${s.genus}`.toLowerCase()}
           >
             <SpeciesCard species={byId[s.id]} kicker={s.family} />
           </div>
@@ -278,7 +306,12 @@ const statuses = IUCN_ORDER.filter((s) =>
 
     let suborder = 'all';
     let status = 'all';
-    let query = '';
+    // Honours ?q= so that a linked or bookmarked search — including the
+    // SearchAction advertised in the site's JSON-LD — actually filters.
+    let query = (new URLSearchParams(location.search).get('q') || '')
+      .trim()
+      .toLowerCase();
+    if (query) search.value = query;
 
     function apply() {
       let shown = 0;
@@ -329,5 +362,9 @@ const statuses = IUCN_ORDER.filter((s) =>
       setPressed(chips, chips[0]);
       apply();
     });
+
+    // Only does work when ?q= put something in `query`; otherwise it just
+    // re-affirms the server-rendered state.
+    if (query) apply();
   }
 </script>

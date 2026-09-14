@@ -4,15 +4,38 @@ import { Image } from 'astro:assets';
 import Analytics from '@vercel/analytics/astro';
 import whaleIcon from '../assets/whale.svg';
 import ThemeToggle from '../components/ThemeToggle.astro';
+import { canonicalUrl, SITE_NAME } from '../utils/seo';
+import type { JsonLdNode } from '../utils/seo';
+
+// Preloaded rather than merely imported: these two faces are the Atlas theme's
+// body and display fonts, and the display face renders the largest text on
+// every page. Left to the stylesheet they are discovered only after the CSS
+// has parsed, which costs the LCP a whole round trip.
+import bodyFont from '@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2?url';
+import displayFont from '@fontsource/spectral/files/spectral-latin-300-normal.woff2?url';
+
+export interface SocialImage {
+  /** Absolute URL — social scrapers do not resolve relative paths. */
+  url: string;
+  width: number;
+  height: number;
+  alt: string;
+}
 
 export interface Props {
   title?: string;
   description?: string;
+  /** Per-page sharing card. Falls back to the site-wide one. */
+  image?: SocialImage;
+  /** Page-level schema.org graph, already assembled by the page. */
+  jsonLd?: JsonLdNode;
 }
 
 const {
-  title = 'Whale Encyclopedia',
-  description = 'A comprehensive guide to whale species',
+  title = SITE_NAME,
+  description = 'An atlas of every living whale species, mapped across the branches of life.',
+  image,
+  jsonLd,
 } = Astro.props;
 
 const path = Astro.url.pathname;
@@ -24,7 +47,20 @@ const navTabs = [
   { href: '/species', label: 'Species', current: isSpeciesIndex },
 ];
 
-const canonical = new URL(path, Astro.site ?? 'https://whales.rocks');
+const canonical = canonicalUrl(path);
+
+const social: SocialImage = image ?? {
+  url: canonicalUrl('/og-default.png'),
+  width: 1200,
+  height: 630,
+  alt: 'Whale Encyclopedia — an atlas of every living whale species',
+};
+
+// `<` is the only character that can break out of a <script> element; the JSON
+// itself is already safe for an element that is not HTML-parsed.
+const jsonLdPayload = jsonLd
+  ? JSON.stringify(jsonLd).replace(/</g, '\\u003c')
+  : null;
 
 // Single-path whale mark from the Atlas design — inlined so the Atlas header
 // can tint it with the accent colour via currentColor.
@@ -65,30 +101,53 @@ const WHALE_PATH =
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 
+    <!-- The two Atlas faces that render above the fold. -->
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={displayFont}
+      crossorigin
+    />
+    <link
+      rel="preload"
+      as="font"
+      type="font/woff2"
+      href={bodyFont}
+      crossorigin
+    />
+
     <!-- SEO Meta Tags -->
     <meta name="author" content="Vic and Andrei Pop" />
-    <meta
-      name="keywords"
-      content="whales, cetaceans, marine mammals, ocean, conservation, endangered species, whale species, whale encyclopedia"
-    />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
     <meta property="og:type" content="website" />
     <meta property="og:url" content={canonical} />
-    <meta property="og:image" content="https://whales.rocks/og-image.png" />
-    <meta property="og:site_name" content="Whale Encyclopedia" />
+    <meta property="og:locale" content="en" />
+    <meta property="og:image" content={social.url} />
+    <meta property="og:image:width" content={String(social.width)} />
+    <meta property="og:image:height" content={String(social.height)} />
+    <meta property="og:image:alt" content={social.alt} />
+    <meta property="og:site_name" content={SITE_NAME} />
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={title} />
     <meta name="twitter:description" content={description} />
-    <meta name="twitter:image" content="https://whales.rocks/og-image.png" />
+    <meta name="twitter:image" content={social.url} />
+    <meta name="twitter:image:alt" content={social.alt} />
 
     <!-- Canonical URL -->
     <link rel="canonical" href={canonical} />
 
     <!-- Sitemap -->
     <link rel="sitemap" href="/sitemap-index.xml" />
+
+    {
+      jsonLdPayload && (
+        <script is:inline type="application/ld+json" set:html={jsonLdPayload} />
+      )
+    }
   </head>
   <body class="flex min-h-screen flex-col">
     <!-- Ambient light field behind the Atlas theme. Purely decorative. -->
@@ -140,7 +199,16 @@ const WHALE_PATH =
                 height={64}
               />
             </a>
-            <h1 class="text-2xl font-bold md:text-4xl">Whale Encyclopedia</h1>
+            {
+              /* Site name, not the page's subject. Both themes ship in the
+                DOM, so a heading here would give every page a second <h1>
+                competing with its real one. `t-h1` re-applies the face the
+                element used to inherit from the base `h1` rule, so the
+                rendering is unchanged. */
+            }
+            <div class="t-h1 text-2xl font-bold md:text-4xl">
+              Whale Encyclopedia
+            </div>
           </div>
           <p class="text-blue-100">
             Discover the magnificent cetaceans of our oceans

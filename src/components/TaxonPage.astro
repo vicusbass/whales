@@ -4,31 +4,75 @@ import SpeciesCard from '../components/SpeciesCard.astro';
 import Breadcrumbs from '../components/Breadcrumbs.astro';
 import {
   byId,
+  childrenOf,
   commonLabel,
   lineageOf,
+  sciName,
   shortLabel,
   speciesUnder,
   type WhaleNode,
 } from '../utils/whales';
+import { TAXON_COPY } from '../data/taxonCopy';
+import {
+  breadcrumbList,
+  canonicalUrl,
+  graph,
+  higherTaxon,
+  publisher,
+  socialImageForTaxon,
+  taxonDescription,
+  taxonItemList,
+  webPage,
+  webSite,
+} from '../utils/seo';
 
 export interface Props {
   taxon: WhaleNode;
   /** Heading above the grid, e.g. "Species in this Family". */
   heading: string;
-  title: string;
-  description: string;
 }
 
-const { taxon, heading, title, description } = Astro.props;
+const { taxon, heading } = Astro.props;
 
 const species = speciesUnder(taxon.id);
 const trail = lineageOf(taxon.id);
 const rank = taxon.type.charAt(0).toUpperCase() + taxon.type.slice(1);
 
-// Most taxon labels carry their common name in parentheses
-// ("Balaenopteridae (Rorquals)"); split it out so the heading can be clean.
-const name = shortLabel(taxon.label);
+const name = sciName(taxon);
 const common = taxon.common_name || commonLabel(taxon.label);
+const copy = TAXON_COPY[taxon.id];
+
+/**
+ * What to put after the name in the <title>. A vernacular name if the taxon
+ * has one; the single species' name if the taxon holds exactly one; otherwise
+ * the count, which is the next most useful thing a searcher can see.
+ */
+const subtitle =
+  common ||
+  (species.length === 1
+    ? species[0].common_name || species[0].label
+    : `${species.length} whale species`);
+
+const title = `${name} — ${subtitle} | Whale Encyclopedia`;
+const description = taxonDescription(taxon, species.length, copy?.summary);
+const social = await socialImageForTaxon(taxon, species);
+
+const url = canonicalUrl(`/${taxon.type}/${taxon.id}`);
+const children = childrenOf(taxon.id);
+const jsonLd = graph([
+  webSite(),
+  publisher(),
+  webPage({
+    url,
+    name: `${name}${common ? ` (${common})` : ''}`,
+    description,
+    primaryEntityId: `${url}#taxon`,
+    breadcrumbId: `${url}#breadcrumbs`,
+  }),
+  breadcrumbList(trail),
+  higherTaxon(taxon, children, copy?.summary),
+  taxonItemList(url, heading, species),
+]);
 
 /** Family name for the Atlas card kicker — species cards sit under mixed ranks. */
 function kickerFor(s: WhaleNode) {
@@ -38,14 +82,18 @@ function kickerFor(s: WhaleNode) {
 }
 ---
 
-<Layout title={title} description={description}>
+<Layout title={title} description={description} image={social} jsonLd={jsonLd}>
   <Breadcrumbs trail={trail} />
 
   <header class="taxon">
     <div class="kicker atlas-only">{rank}</div>
     <h1 class="t-display taxon__name">{name}</h1>
     {common && <p class="taxon__common">{common}</p>}
-    {taxon.description && <p class="taxon__desc">{taxon.description}</p>}
+    {
+      (copy?.summary || taxon.description) && (
+        <p class="taxon__desc">{copy?.summary ?? taxon.description}</p>
+      )
+    }
 
     <div class="taxon__stats atlas-only">
       <div>
@@ -54,6 +102,19 @@ function kickerFor(s: WhaleNode) {
       </div>
     </div>
   </header>
+
+  {
+    copy && (
+      <section class="taxon__article">
+        <h2 class="t-display taxon__article-title">
+          About {common ? `the ${common.toLowerCase()}` : name}
+        </h2>
+        {copy.body.map((paragraph) => (
+          <p>{paragraph}</p>
+        ))}
+      </section>
+    )
+  }
 
   <h2 class="t-display taxon__heading">{heading}</h2>
 
@@ -115,6 +176,28 @@ function kickerFor(s: WhaleNode) {
     margin-top: 8px;
   }
 
+  .taxon__article {
+    max-width: 680px;
+    margin-top: 44px;
+  }
+
+  .taxon__article-title {
+    font-size: clamp(22px, 2.6vw, 28px);
+    letter-spacing: -0.3px;
+    margin: 0 0 18px;
+  }
+
+  .taxon__article p {
+    font-size: 16px;
+    line-height: 1.75;
+    color: var(--muted);
+    margin: 0 0 18px;
+  }
+
+  .taxon__article p:last-child {
+    margin-bottom: 0;
+  }
+
   .taxon__heading {
     font-size: clamp(22px, 2.6vw, 28px);
     letter-spacing: -0.3px;
@@ -154,6 +237,18 @@ function kickerFor(s: WhaleNode) {
     font-size: 1rem;
     color: #374151;
     margin-bottom: 2rem;
+  }
+
+  :global(html[data-theme='classic']) .taxon__article-title {
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: normal;
+    border-bottom: 1px solid #93c5fd;
+    padding-bottom: 0.5rem;
+  }
+
+  :global(html[data-theme='classic']) .taxon__article p {
+    color: #374151;
   }
 
   :global(html[data-theme='classic']) .taxon__heading {

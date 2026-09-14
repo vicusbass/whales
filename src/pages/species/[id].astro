@@ -4,6 +4,7 @@ import Layout from '../../layouts/Layout.astro';
 import SpeciesCard from '../../components/SpeciesCard.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
 import {
+  binomialOf,
   byId,
   childrenOf,
   imageFor,
@@ -13,6 +14,20 @@ import {
   shortLabel,
   type WhaleNode,
 } from '../../utils/whales';
+import {
+  breadcrumbList,
+  canonicalUrl,
+  graph,
+  imageObject,
+  OG_HEIGHT,
+  OG_WIDTH,
+  publisher,
+  socialImageForSpecies,
+  speciesDescription,
+  speciesTaxon,
+  webPage,
+  webSite,
+} from '../../utils/seo';
 
 export async function getStaticPaths() {
   return nodes
@@ -60,11 +75,56 @@ const classicBadge: Record<string, string> = {
 const statusKey = (species.iucn_status || '').toLowerCase();
 const frameClass = classicFrame[statusKey] ?? 'border-gray-400 shadow-gray-200';
 const badgeClass = classicBadge[statusKey] ?? 'bg-gray-100 text-gray-800';
+
+// "Balaenoptera musculus", not the "B. musculus" the dataset stores. Nobody
+// searches the abbreviated form, and on a page arrived at from a search result
+// there is no surrounding context to expand it.
+const binomial = binomialOf(species);
+const common = species.common_name || binomial;
+
+const url = canonicalUrl(`/species/${species.id}`);
+const description = speciesDescription(species);
+const social = await socialImageForSpecies(species);
+
+// Describes the 1200x630 rendition rather than the on-page one: it is the
+// widest public rendering of the photo, which is the size image results want.
+const schemaImage = social
+  ? imageObject(
+      {
+        url: social.url,
+        width: OG_WIDTH,
+        height: OG_HEIGHT,
+        caption: `${common} (${binomial})`,
+        creator: species.author,
+      },
+      url
+    )
+  : undefined;
+
+const jsonLd = graph(
+  [
+    webSite(),
+    publisher(),
+    webPage({
+      url,
+      name: `${common} (${binomial})`,
+      description,
+      primaryEntityId: `${url}#taxon`,
+      breadcrumbId: `${url}#breadcrumbs`,
+      imageId: schemaImage ? `${url}#primaryimage` : undefined,
+    }),
+    breadcrumbList(lineage),
+    speciesTaxon(species, Boolean(schemaImage)),
+    schemaImage,
+  ].filter(Boolean) as Record<string, unknown>[]
+);
 ---
 
 <Layout
-  title={`${species.common_name || species.label} | Whale Encyclopedia`}
-  description={`Learn about ${species.common_name || species.label}, ${species.description?.substring(0, 150) || 'a whale species'}`}
+  title={`${common} (${binomial}) | Whale Encyclopedia`}
+  description={description}
+  image={social}
+  jsonLd={jsonLd}
 >
   <article class="detail" style={`--status:${statusColor};`}>
     <a href="/species" class="wback detail__back atlas-only">← All species</a>
@@ -79,11 +139,12 @@ const badgeClass = classicBadge[statusKey] ?? 'bg-gray-100 text-gray-800';
               image ? (
                 <Image
                   src={image}
-                  alt={species.common_name || species.label}
+                  alt={`${common} (${binomial})`}
                   class="detail__img"
                   width={1000}
                   height={800}
                   loading="eager"
+                  fetchpriority="high"
                 />
               ) : (
                 <div class="detail__placeholder">
@@ -109,10 +170,8 @@ const badgeClass = classicBadge[statusKey] ?? 'bg-gray-100 text-gray-800';
       </div>
 
       <div class="detail__info">
-        <h1 class="t-display detail__name">
-          {species.common_name || 'Unknown Common Name'}
-        </h1>
-        <p class="t-sci detail__sci">{species.label}</p>
+        <h1 class="t-display detail__name">{common}</h1>
+        <p class="t-sci detail__sci">{binomial}</p>
 
         <div class="detail__about">
           <h2 class="classic-only detail__about-title">About This Species</h2>
@@ -164,16 +223,14 @@ const badgeClass = classicBadge[statusKey] ?? 'bg-gray-100 text-gray-800';
         <figure>
           <Image
             src={image}
-            alt={species.common_name || species.label}
+            alt={`${common} (${binomial})`}
             width={1600}
             height={1200}
             loading="lazy"
           />
           <figcaption>
-            <div class="detail-lightbox__common">
-              {species.common_name || species.label}
-            </div>
-            <div class="detail-lightbox__sci">{species.label}</div>
+            <div class="detail-lightbox__common">{common}</div>
+            <div class="detail-lightbox__sci">{binomial}</div>
           </figcaption>
         </figure>
       </div>
