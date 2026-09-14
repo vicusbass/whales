@@ -751,7 +751,7 @@
       "type": "species",
       "parent": "delphinapterus",
       "description": "Medium-sized Arctic cetacean (3-5.5m length, 400-1,500kg) known as the 'white whale' and 'sea canary.' Adults are uniformly white with distinctive bulbous forehead (melon) and no dorsal fin. Highly social, forming pods of 10-25 individuals that communicate using diverse vocalizations. Feeds primarily on fish, squid, and crustaceans in Arctic and subarctic waters.",
-      "iucn_status": "Near Threatened",
+      "iucn_status": "Least Concern",
       "size": "3-5.5m",
       "weight": "400-1,500kg"
     },
@@ -1060,8 +1060,8 @@
       "critically_endangered": 2,
       "endangered": 3,
       "vulnerable": 2,
-      "near_threatened": 5,
-      "least_concern": 16,
+      "near_threatened": 4,
+      "least_concern": 17,
       "data_deficient": 16
     },
     "notes": "Restructured for Chart.js compatibility with nodes and edges arrays. Each node has unique ID, parent references, and children arrays for hierarchical visualization. Updated based on comprehensive research including recent taxonomic changes."
