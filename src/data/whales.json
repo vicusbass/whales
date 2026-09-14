@@ -217,7 +217,7 @@
       "label": "Mesoplodon",
       "type": "genus",
       "parent": "ziphiidae",
-      "species_count": 17,
+      "species_count": 16,
       "children": [
         "m_mirus",
         "m_europaeus",
@@ -231,7 +231,6 @@
         "m_grayi",
         "m_layardii",
         "m_peruvianus",
-        "m_perrin",
         "m_perrini",
         "m_traversii",
         "m_hotaula",
@@ -1027,10 +1026,6 @@
     },
     {
       "source": "mesoplodon",
-      "target": "m_perrin"
-    },
-    {
-      "source": "mesoplodon",
       "target": "m_perrini"
     },
     {
@@ -1056,17 +1051,17 @@
   ],
   "summary": {
     "total_species": 44,
-    "total_genera": 13,
-    "total_families": 6,
+    "total_genera": 16,
+    "total_families": 8,
     "total_suborders": 2,
     "mysticeti_species": 15,
     "odontoceti_species": 29,
     "conservation_status_breakdown": {
       "critically_endangered": 2,
-      "endangered": 4,
+      "endangered": 3,
       "vulnerable": 2,
       "near_threatened": 5,
-      "least_concern": 21,
+      "least_concern": 16,
       "data_deficient": 16
     },
     "notes": "Restructured for Chart.js compatibility with nodes and edges arrays. Each node has unique ID, parent references, and children arrays for hierarchical visualization. Updated based on comprehensive research including recent taxonomic changes."
