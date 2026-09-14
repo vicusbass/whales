@@ -669,11 +669,29 @@ const payload = JSON.stringify(graphData(thumbs)).replace(/</g, '\\u003c');
     'Data Deficient': '#7E8C99',
   };
 
-  // Ring radius per depth. The design used 215 for the first ring, which was
-  // tuned for a narrower stage: at our width the two suborders land at exactly
-  // 0 and π — the angles where the pills are widest — and collide with the
-  // root. Pushing the first ring out clears it; later rings keep the 150 step.
+  // Minimum ring radius per depth. The design used 215 for the first ring,
+  // which was tuned for a narrower stage: at our width the suborder pills are
+  // wide enough to collide with the root. Pushing the first ring out clears
+  // it; later rings keep the 150 step. A ring is free to sit further out than
+  // this — see layout(), which widens it until the pills on it stop touching.
   const RADII = [0, 300, 450, 600, 750, 900];
+
+  // Tangential gap left between two pills sharing a ring, the clearance left
+  // between a pill and its parent on the ring inside it, and the smallest and
+  // largest radius a ring may take.
+  const SIB_GAP = 34;
+  const RING_GAP = 34;
+  const RING_MIN = 120;
+  const RING_MAX = 4200;
+
+  // The graph is a radial *tree*, not a sunburst: children fan across an arc
+  // that opens downwards rather than the whole circle, so the root sits above
+  // everything it parents and the hierarchy reads top-down. These are screen
+  // angles — 0 points right, π/2 points straight down — and the small inset
+  // at each end keeps the outermost branches from drifting level with the
+  // root, which is what made the first ring read as a flat row.
+  const FAN_START = Math.PI * 0.06;
+  const FAN_SPAN = Math.PI * 0.88;
   const SVGNS = 'http://www.w3.org/2000/svg';
   const ROOT = 'cetacea';
 
@@ -869,49 +887,124 @@ const payload = JSON.stringify(graphData(thumbs)).replace(/</g, '\\u003c');
       });
     }
 
+    /** Half the pill's own width, measured from the DOM. Ring spacing is
+     *  driven by how wide the labels actually render — a ring of six beaked
+     *  whale genera needs far more room than a ring of two suborders, and the
+     *  mobile pills are a different size again. */
+    halfW(id: string) {
+      const card = this.els[id]?.card;
+      return card && card.offsetWidth ? card.offsetWidth / 2 : 70;
+    }
+
+    halfH(id: string) {
+      const card = this.els[id]?.card;
+      return card && card.offsetHeight ? card.offsetHeight / 2 : 22;
+    }
+
+    /** How far the pill reaches along a given direction. Pills are much wider
+     *  than they are tall, so a branch heading sideways needs several times
+     *  the clearance between rings that a branch heading straight down does. */
+    radialExt(id: string, ang: number) {
+      return (
+        Math.abs(this.halfW(id) * Math.cos(ang)) +
+        Math.abs(this.halfH(id) * Math.sin(ang))
+      );
+    }
+
     layout() {
+      // Pass one: angles only. Every node takes a slice of its parent's wedge,
+      // weighted by how many leaves that branch currently shows, so an open
+      // branch spreads and its collapsed siblings tuck in beside it.
+      const byDepth: string[][] = [[ROOT]];
       const place = (id: string, depth: number, a0: number, a1: number) => {
-        const ang = (a0 + a1) / 2;
-        const base =
-          RADII[depth] != null
-            ? RADII[depth]
-            : RADII[RADII.length - 1] + 150 * (depth - RADII.length + 1);
-        const r = base * this.rscale;
-        const p = this.slot(id);
-        p.x = r * Math.cos(ang);
-        p.y = r * Math.sin(ang);
-        p.angle = ang;
-        p.depth = depth;
-        const k = this.graphKids(id);
-        if (this.expanded.has(id) && k.length) {
-          const weights = k.map((c) => this.visLeaf(c) + 1.2);
-          const total = weights.reduce((s, w) => s + w, 0);
-          const span = a1 - a0;
-          const pad = Math.min(span * 0.06, 0.05);
-          let cur = a0;
-          k.forEach((c, i) => {
-            const w = (weights[i] / total) * span;
-            place(c, depth + 1, cur + pad, cur + w - pad);
-            cur += w;
-          });
-        }
+        const q = this.slot(id);
+        q.angle = (a0 + a1) / 2;
+        q.depth = depth;
+        (byDepth[depth] ||= []).push(id);
+        const kids = this.graphKids(id);
+        if (!this.expanded.has(id) || !kids.length) return;
+        const weights = kids.map((c) => this.visLeaf(c) + 1.2);
+        const total = weights.reduce((s, w) => s + w, 0);
+        const span = a1 - a0;
+        const pad = Math.min(span * 0.06, 0.05);
+        let cur = a0;
+        kids.forEach((c, i) => {
+          const w = (weights[i] / total) * span;
+          place(c, depth + 1, cur + pad, cur + w - pad);
+          cur += w;
+        });
       };
 
       const p = this.slot(ROOT);
       p.x = 0;
       p.y = 0;
-      p.angle = -Math.PI / 2;
+      p.angle = Math.PI / 2;
       p.depth = 0;
       const k = this.graphKids(ROOT);
       if (this.expanded.has(ROOT) && k.length) {
         const weights = k.map((c) => this.visLeaf(c) + 1.2);
         const total = weights.reduce((s, w) => s + w, 0);
-        let cur = -Math.PI / 2;
+        let cur = FAN_START;
         k.forEach((c, i) => {
-          const w = (weights[i] / total) * Math.PI * 2;
+          const w = (weights[i] / total) * FAN_SPAN;
           place(c, 1, cur, cur + w);
           cur += w;
         });
+      }
+
+      // Pass two: radii. Fanning downwards instead of around a whole circle
+      // leaves each ring less than half the arc it used to have, so a fixed
+      // radius per depth sat neighbouring pills on top of one another. Push
+      // each ring out until the tightest gap between two of its pills is wide
+      // enough to hold them both.
+      let prev = 0;
+      for (let d = 1; d < byDepth.length; d++) {
+        const ids = (byDepth[d] || [])
+          .slice()
+          .sort((a, b) => this.pos[a].angle - this.pos[b].angle);
+        const fallback =
+          RADII[d] != null
+            ? RADII[d]
+            : RADII[RADII.length - 1] + 150 * (d - RADII.length + 1);
+        let r = fallback * this.rscale;
+        for (let i = 1; i < ids.length; i++) {
+          const a = this.pos[ids[i - 1]].angle;
+          const b = this.pos[ids[i]].angle;
+          // Pills are rectangles, so two of them are clear of each other as
+          // soon as they are far enough apart on *either* axis — measuring the
+          // arc between them instead let the first ring's two suborders sit
+          // shoulder to shoulder with no visible gap.
+          const dx = Math.abs(Math.cos(a) - Math.cos(b));
+          const dy = Math.abs(Math.sin(a) - Math.sin(b));
+          const need = Math.min(
+            dx > 1e-4
+              ? (this.halfW(ids[i - 1]) + this.halfW(ids[i]) + SIB_GAP) / dx
+              : Infinity,
+            dy > 1e-4
+              ? (this.halfH(ids[i - 1]) + this.halfH(ids[i]) + SIB_GAP) / dy
+              : Infinity
+          );
+          if (need > r && need < RING_MAX) r = need;
+        }
+        // ...and far enough beyond the ring inside it that no pill lands on
+        // its own parent, which is what a flat step per ring did to the
+        // branches running out sideways.
+        let step = RING_MIN;
+        for (const id of ids) {
+          const par = this.by[id].parent;
+          if (!par || !this.pos[par]) continue;
+          const ang = this.pos[id].angle;
+          const need =
+            this.radialExt(par, ang) + this.radialExt(id, ang) + RING_GAP;
+          if (need > step) step = need;
+        }
+        r = Math.min(Math.max(r, prev + step), RING_MAX);
+        prev = r;
+        for (const id of ids) {
+          const q = this.pos[id];
+          q.x = r * Math.cos(q.angle);
+          q.y = r * Math.sin(q.angle);
+        }
       }
     }
 
