@@ -10,6 +10,8 @@
 import { getImage } from 'astro:assets';
 import { byId, binomialOf, commonLabel, imageFor, sciName } from './whales';
 import type { WhaleNode } from './whales';
+import { copyrightNotice, creditText } from '../data/imageCredits';
+import type { ImageCredit } from '../data/imageCredits';
 
 /** Must match `site` in astro.config.mjs. */
 export const SITE = 'https://whales.rocks';
@@ -215,10 +217,20 @@ export interface TaxonImage {
   width: number;
   height: number;
   caption: string;
-  creator?: string;
+  /** Verified provenance. Without it there is no ImageObject to emit. */
+  credit: ImageCredit;
 }
 
+/**
+ * The `ImageObject` Google reads for its image-metadata feature.
+ *
+ * `creator`, `creditText`, `copyrightNotice`, `license` and
+ * `acquireLicensePage` are the five fields that feature asks for; every one of
+ * them comes from the file's own Commons record via `src/data/imageCredits.ts`,
+ * so a page either states the real licence or says nothing at all.
+ */
 export function imageObject(image: TaxonImage, pageUrl: string): JsonLdNode {
+  const { credit } = image;
   return {
     '@type': 'ImageObject',
     '@id': `${pageUrl}#primaryimage`,
@@ -227,15 +239,20 @@ export function imageObject(image: TaxonImage, pageUrl: string): JsonLdNode {
     width: image.width,
     height: image.height,
     caption: image.caption,
-    ...(image.creator
+    ...(credit.creator
       ? {
-          creator: { '@type': 'Person', name: image.creator },
-          // Every photo in src/assets came from Wikimedia Commons; the exact
-          // per-file licence lives with the file there, which is what
-          // acquireLicensePage points at.
-          acquireLicensePage: 'https://commons.wikimedia.org/',
+          creator: {
+            '@type': credit.creatorType ?? 'Person',
+            name: credit.creator,
+          },
         }
       : {}),
+    creditText: creditText(credit),
+    copyrightNotice: copyrightNotice(credit),
+    license: credit.licenseUrl,
+    // Where a reader can read the terms and reuse the file themselves — the
+    // Commons file page, not the site that merely displays it.
+    acquireLicensePage: credit.source,
   };
 }
 

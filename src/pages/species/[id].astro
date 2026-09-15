@@ -3,6 +3,7 @@ import { Image } from 'astro:assets';
 import Layout from '../../layouts/Layout.astro';
 import SpeciesCard from '../../components/SpeciesCard.astro';
 import Breadcrumbs from '../../components/Breadcrumbs.astro';
+import { creditFor } from '../../data/imageCredits';
 import {
   binomialOf,
   byId,
@@ -88,18 +89,22 @@ const social = await socialImageForSpecies(species);
 
 // Describes the 1200x630 rendition rather than the on-page one: it is the
 // widest public rendering of the photo, which is the size image results want.
-const schemaImage = social
-  ? imageObject(
-      {
-        url: social.url,
-        width: OG_WIDTH,
-        height: OG_HEIGHT,
-        caption: `${common} (${binomial})`,
-        creator: species.author,
-      },
-      url
-    )
-  : undefined;
+// Emitted only for a photo whose licence we have actually verified — see
+// src/data/imageCredits.ts.
+const credit = creditFor(species.id);
+const schemaImage =
+  social && credit
+    ? imageObject(
+        {
+          url: social.url,
+          width: OG_WIDTH,
+          height: OG_HEIGHT,
+          caption: `${common} (${binomial})`,
+          credit,
+        },
+        url
+      )
+    : undefined;
 
 const jsonLd = graph(
   [
@@ -158,9 +163,13 @@ const jsonLd = graph(
           </div>
 
           {
-            species.author && (
-              <p class="detail__credit" title={species.author}>
-                Photo: {species.author}
+            image && credit && (
+              <p class="detail__credit">
+                Photo: {credit.creator ?? 'Unknown author'} ·{' '}
+                <a href={credit.source} target="_blank" rel="noopener">
+                  {credit.licenseName}
+                </a>{' '}
+                · Wikimedia Commons
               </p>
             )
           }
