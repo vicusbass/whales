@@ -16,7 +16,6 @@ export interface WhaleNode {
   size?: string;
   weight?: string;
   species_count?: number;
-  author?: string;
 }
 
 export const nodes = whalesData.nodes as WhaleNode[];
